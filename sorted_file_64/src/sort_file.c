@@ -16,13 +16,15 @@ SR_ErrorCode SR_CreateFile(const char *fileName) {
 
 SR_ErrorCode SR_OpenFile(const char *fileName, int *fileDesc) {
   // Your code goes here
-
+  if(BF_OpenFile(fileName, fileDesc) != BF_OK)
+    return SR_ERROR;
   return SR_OK;
 }
 
 SR_ErrorCode SR_CloseFile(int fileDesc) {
   // Your code goes here
-
+  if(BF_CloseFile(fileDesc) != BF_OK)
+    return SR_ERROR;
   return SR_OK;
 }
 
