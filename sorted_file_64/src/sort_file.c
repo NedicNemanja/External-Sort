@@ -1,4 +1,5 @@
 #include "sort_file.h"
+#include "bf.h"
 
 SR_ErrorCode SR_Init() {
   // Your code goes here
@@ -8,7 +9,8 @@ SR_ErrorCode SR_Init() {
 
 SR_ErrorCode SR_CreateFile(const char *fileName) {
   // Your code goes here
-
+  if(BF_CreateFile(fileName) != BF_OK)
+    return SR_ERROR;
   return SR_OK;
 }
 
