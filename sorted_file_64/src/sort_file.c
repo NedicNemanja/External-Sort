@@ -106,11 +106,11 @@ SR_ErrorCode SR_InsertEntry(int fileDesc,	Record record) {
   BF_Block_Init(&block);
 
   if(BF_GetBlockCounter(fileDesc, &blocks) != BF_OK)
-    return HP_ERROR;
+    return SR_ERROR;
 
   if(blocks == 1){
     if(BF_AllocateBlock(fileDesc, block) != BF_OK)
-      return HP_ERROR;
+      return SR_ERROR;
     data = BF_Block_GetData(block);
     offset = init_block(data, &record);
   }
@@ -161,7 +161,8 @@ SR_ErrorCode SR_InsertEntry(int fileDesc,	Record record) {
   memmove(data, &recs, sizeof(int));
 
   BF_Block_SetDirty(block);
-  BF_UnpinBlock(block);
+  if(BF_UnpinBlock(block) != BF_OK)
+    return SR_ERROR;
   BF_Block_Destroy(&block);
   return SR_OK;
 }
