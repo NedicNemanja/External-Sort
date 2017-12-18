@@ -67,9 +67,102 @@ SR_ErrorCode SR_CloseFile(int fileDesc) {
   return SR_OK;
 }
 
+//helper method that copies the record counter and
+//the sizes of record in a new block
+int init_block(char * data, Record * record){
+  int offset = 0;
+  //size gets sizes so we can pass its address to memmove
+  int size = 0;
+  //move the counter (0) to the start of the block
+  memmove(data, &offset, sizeof(int));
+  offset = sizeof(int);
+  //move sizes of Record to the start of the block
+  size = sizeof(record->id);
+  memmove(data+offset, &size, sizeof(int));
+  offset += sizeof(int);
+  size = sizeof(record->name);
+  memmove(data+offset, &size, sizeof(int));
+  offset += sizeof(int);
+  size = sizeof(record->surname);
+  memmove(data+offset, &size, sizeof(int));
+  offset += sizeof(int);
+  size = sizeof(record->city);
+  memmove(data+offset, &size, sizeof(int));
+  offset += sizeof(int);
+  return offset;
+}
+
 SR_ErrorCode SR_InsertEntry(int fileDesc,	Record record) {
   // Your code goes here
 
+  int offset = 0, blocks = 0, recs = 0;
+  int avail_space = 0, recsize = 0;
+  char * data = NULL;
+  int id_size = 0;
+  int name_size = 0;
+  int sur_size = 0;
+  int city_size = 0;
+  BF_Block * block = NULL;
+  BF_Block_Init(&block);
+
+  if(BF_GetBlockCounter(fileDesc, &blocks) != BF_OK)
+    return HP_ERROR;
+
+  if(blocks == 1){
+    if(BF_AllocateBlock(fileDesc, block) != BF_OK)
+      return HP_ERROR;
+    data = BF_Block_GetData(block);
+    offset = init_block(data, &record);
+  }
+  else {
+    if(BF_GetBlock(fileDesc, blocks-1, block) != BF_OK)
+      return SR_ERROR;
+    data = BF_Block_GetData(block);
+    //get how many records are in the block
+    memmove(&recs, data, sizeof(int));
+    offset = sizeof(int);
+    //get sizes of Record
+    memmove(&id_size, data+offset, sizeof(int));
+    offset += sizeof(int);
+    memmove(&name_size, data+offset, sizeof(int));
+    offset += sizeof(int);
+    memmove(&sur_size, data+offset, sizeof(int));
+    offset += sizeof(int);
+    memmove(&city_size, data+offset, sizeof(int));
+    offset += sizeof(int);
+
+    //check if there is available space left
+    recsize = id_size + name_size + sur_size + city_size;
+    offset += recs*(id_size + name_size + sur_size + city_size);
+    avail_space = BF_BLOCK_SIZE - offset;
+
+    //allocate new block as above
+    if(avail_space - recsize< 0){
+      //unpin previous block
+      BF_UnpinBlock(block);
+      if(BF_AllocateBlock(fileDesc, block) != BF_OK)
+        return SR_ERROR;
+      data = BF_Block_GetData(block);
+      offset = init_block(data, &record);
+      recs = 0;
+    }
+  }
+
+  //copy Record
+  memmove(data+offset, &(record.id), sizeof(int));
+  offset += sizeof(int);
+  memmove(data+offset, record.name, sizeof(record.name));
+  offset += sizeof(record.name);
+  memmove(data+offset, record.surname, sizeof(record.surname));
+  offset += sizeof(record.surname);
+  memmove(data+offset, record.city, sizeof(record.city));
+  //update record counter and set block to dirty
+  recs++;
+  memmove(data, &recs, sizeof(int));
+
+  BF_Block_SetDirty(block);
+  BF_UnpinBlock(block);
+  BF_Block_Destroy(&block);
   return SR_OK;
 }
 
