@@ -79,7 +79,53 @@ SR_ErrorCode SR_SortedFile(
   int fieldNo,
   int bufferSize
 ) {
-  // Your code goes here
+  if(bufferSize<3 || bufferSize>BF_BUFFER_SIZE)
+    return BAD_bufferSize;
+/******************************************************************************
+***********sort the file into runs and save them in a temporary file***********
+******************************************************************************/
+  //creating the temp file where sorted runs will be kept
+  SR_CreateFile("tempSortFile");
+  int tempFileDesc;
+  SR_OpenFile("tempSortFile",&tempFileDesc);
+
+  /*initialize pinnedBlocks:  This is where we keep the BF_Block* of the files
+                              that are currently pinned.*/
+  BF_Block* pinnedBlocks[bufferSize];
+  for(int i=0; i<bufferSize; i++)
+      BF_Block_Init(&pinnedBlocks[i]);
+
+  //initialize some counters
+  int BlockCount, iteratedBlocks = 0;
+  BF_GetBlockCounter(fileDesc,&BlockCount);
+  iteratedBlocks++; //skip the metadata block
+  int lastRunSize = BlockCount%bufferSize;
+
+  //get,sort and store the runs one by one
+  while(iteratedBlocks < BlockCount-lastRunSize){
+      //get the run to the buffers
+      for(int i=0; i<bufferSize; i++){
+        BF_GetBlock(fileDesc,iteratedBlocks,pinnedBlocks[i]);
+        iteratedBlocks++;
+        //if(iteratedBlocks >= BlockCount)  //the last run might be < bufferSize
+        //break;
+      }
+      //sort the run and store it
+      HeapSortRun(pinnedBlocks,bufferSize,tempFileDesc);  /*EDW EISAI
+                        HeapSort( pinakas me tous deiktes tou run mou,
+                                  posa block kanw sort(poso megalo einai to run),
+                                  fieldNo me vasi to opoio taksinomo ta records,
+                                  arxeio opou apothikeuw ta taksinomimena runs)*/
+      //unpin this run
+      for(int i=0; i<bufferSize; i++){
+        BF_UnpinBlock(pinnedBlocks[i]);
+        pinnedBlocks[i] = NULL;
+      }
+  }
+  //do the last run as well
+/******************************************************************************
+**************merge the runs and store them in the output_filename*************
+******************************************************************************/
 
   return SR_OK;
 }

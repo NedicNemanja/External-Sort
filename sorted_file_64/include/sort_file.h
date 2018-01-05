@@ -6,6 +6,8 @@ typedef enum SR_ErrorCode {
   SR_ERROR
 } SR_ErrorCode;
 
+#define BAD_bufferSize -1
+
 typedef struct Record {
 	int id;
 	char name[15];
