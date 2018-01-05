@@ -176,6 +176,8 @@ SR_ErrorCode SR_SortedFile(
 ) {
   if(bufferSize<3 || bufferSize>BF_BUFFER_SIZE)
     return BAD_bufferSize;
+  int fileDesc;
+  SR_OpenFile(input_filename,&fileDesc);
 /******************************************************************************
 ***********sort the file into runs and save them in a temporary file***********
 ******************************************************************************/
