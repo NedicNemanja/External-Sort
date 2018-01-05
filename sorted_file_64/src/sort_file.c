@@ -1,6 +1,7 @@
 #include <string.h>
 #include "sort_file.h"
 #include "bf.h"
+#include "HelperFunctions.h"
 
 SR_ErrorCode SR_Init() {
   // Your code goes here
@@ -201,22 +202,25 @@ SR_ErrorCode SR_SortedFile(
       for(int i=0; i<bufferSize; i++){
         BF_GetBlock(fileDesc,iteratedBlocks,pinnedBlocks[i]);
         iteratedBlocks++;
-        //if(iteratedBlocks >= BlockCount)  //the last run might be < bufferSize
-        //break;
       }
-      //sort the run and store it
-      HeapSortRun(pinnedBlocks,bufferSize,tempFileDesc);  /*EDW EISAI
+      //sort the run
+      HeapSortRun(pinnedBlocks,bufferSize,fieldNo);  /*EDW EISAI
                         HeapSort( pinakas me tous deiktes tou run mou,
                                   posa block kanw sort(poso megalo einai to run),
-                                  fieldNo me vasi to opoio taksinomo ta records,
-                                  arxeio opou apothikeuw ta taksinomimena runs)*/
-      //unpin this run
-      for(int i=0; i<bufferSize; i++){
-        BF_UnpinBlock(pinnedBlocks[i]);
-        pinnedBlocks[i] = NULL;
-      }
+                                  fieldNo me vasi to opoio taksinomo ta records)*/
+      //store the run in the temporary file
+      StoreRun(tempFileDesc,pinnedBlocks,bufferSize);
   }
-  //do the last run as well
+  //***do the last run as well***
+  //get the last run to the buffers
+  for(int i=0; i<lastRunSize; i++){
+    BF_GetBlock(fileDesc,iteratedBlocks,pinnedBlocks[i]);
+    iteratedBlocks++;
+  }
+  //sort the last run
+  HeapSortRun(pinnedBlocks,lastRunSize,fieldNo);
+  //store it
+  StoreRun(tempFileDesc,pinnedBlocks,lastRunSize);
 /******************************************************************************
 **************merge the runs and store them in the output_filename*************
 ******************************************************************************/
