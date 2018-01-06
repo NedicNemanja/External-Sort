@@ -1,7 +1,7 @@
 #include "HelperFunctions.h"
 
 void HeapSortRun(BF_Block** pinnedBlocks, int bufferSize,int fieldNo){
-  
+
 }
 
 
@@ -14,6 +14,6 @@ void StoreRun(int fileDesc, BF_Block** pinnedBlocks, int run_size){
   }
 }
 
-void InsertBlock(int fileDesc, BF_Block block){
-  
+void InsertBlock(int fileDesc, BF_Block* block){
+
 }
