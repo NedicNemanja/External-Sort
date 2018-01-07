@@ -1,6 +1,10 @@
 #include "HelperFunctions.h"
 
-void HeapSortRun(BF_Block** pinnedBlocks, int bufferSize,int fieldNo){
+void QuickSortRun(BF_Block** blockArray, int size, int fieldNo){
+
+}
+
+void HeapSortRun(BF_Block** blockArray, int size, int fieldNo){
 
 }
 

@@ -206,10 +206,7 @@ SR_ErrorCode SR_SortedFile(
         iteratedBlocks++;
       }
       //sort the run
-      HeapSortRun(pinnedBlocks,bufferSize,fieldNo);  /*EDW EISAI
-                        HeapSort( pinakas me tous deiktes tou run mou,
-                                  posa block kanw sort(poso megalo einai to run),
-                                  fieldNo me vasi to opoio taksinomo ta records)*/
+      QuickSortRun(pinnedBlocks,bufferSize,fieldNo);
       //store the run in the temporary file
       StoreRun(tempFileDesc,pinnedBlocks,bufferSize);
   }
@@ -220,7 +217,7 @@ SR_ErrorCode SR_SortedFile(
     iteratedBlocks++;
   }
   //sort the last run
-  HeapSortRun(pinnedBlocks,lastRunSize,fieldNo);
+  QuickSortRun(pinnedBlocks,lastRunSize,fieldNo);
   //store it
   StoreRun(tempFileDesc,pinnedBlocks,lastRunSize);
 /******************************************************************************
