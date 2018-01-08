@@ -181,12 +181,13 @@ SR_ErrorCode SR_SortedFile(
 /******************************************************************************
 ***********sort the file into runs and save them in a temporary file***********
 ******************************************************************************/
-  //creating the temp file where sorted runs will be kept
+  //creating a copy of the input_file so it remains unchanged
   SR_CreateFile("tempSortFile");
   int tempFileDesc;
   SR_OpenFile("tempSortFile",&tempFileDesc);
+  CopyFile(tempSortFile,fileDesc);
 
-  /*initialize pinnedBlocks:  This is where we keep the BF_Block* of the files
+  /*initialize pinnedBlocks:  This is where we keep the BF_Block* of the blocks
                               that are currently pinned.*/
   BF_Block* pinnedBlocks[bufferSize];
   for(int i=0; i<bufferSize; i++)
@@ -202,13 +203,16 @@ SR_ErrorCode SR_SortedFile(
   while(iteratedBlocks < BlockCount-lastRunSize){
       //get the run to the buffers
       for(int i=0; i<bufferSize; i++){
-        BF_GetBlock(fileDesc,iteratedBlocks,pinnedBlocks[i]);
+        BF_GetBlock(tempFileDesc,iteratedBlocks,pinnedBlocks[i]);
         iteratedBlocks++;
       }
       //sort the run
       QuickSortRun(pinnedBlocks,bufferSize,fieldNo);
-      //store the run in the temporary file
-      StoreRun(tempFileDesc,pinnedBlocks,bufferSize);
+      //store the sorted run back to the temp_file
+      for(int i=0; i<bufferSize; i++){
+        BF_UnpinBlock(pinnedBlocks[i]);
+        pinnedBlocks[i] = NULL;
+      }
   }
   //***do the last run as well***
   //get the last run to the buffers
@@ -219,7 +223,10 @@ SR_ErrorCode SR_SortedFile(
   //sort the last run
   QuickSortRun(pinnedBlocks,lastRunSize,fieldNo);
   //store it
-  StoreRun(tempFileDesc,pinnedBlocks,lastRunSize);
+  for(int i=0; i<lastRunSize; i++){
+    BF_UnpinBlock(pinnedBlocks[i]);
+    pinnedBlocks[i] = NULL;
+  }
 /******************************************************************************
 **************merge the runs and store them in the output_filename*************
 ******************************************************************************/
