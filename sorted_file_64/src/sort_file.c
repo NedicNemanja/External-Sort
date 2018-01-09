@@ -197,6 +197,11 @@ SR_ErrorCode SR_SortedFile(
   BF_GetBlockCounter(fileDesc,&BlockCount);
   iteratedBlocks++; //skip the metadata block
   int lastRunSize = BlockCount%bufferSize;
+  Index low, high;
+  low.blockIndex = 0;
+  low.recordIndex = 0;
+  high.blockIndex = bufferSize - 1;
+  high.recordIndex = (BF_BLOCK_SIZE - BLOCKBASEOFFSET) / SIZEOFRECORD - 1;
 
   //get,sort and store the runs one by one
   while(iteratedBlocks < BlockCount-lastRunSize){
@@ -206,7 +211,7 @@ SR_ErrorCode SR_SortedFile(
         iteratedBlocks++;
       }
       //sort the run
-      QuickSortRun(pinnedBlocks,bufferSize,fieldNo);
+      QuickSortRun(pinnedBlocks,bufferSize,fieldNo, low, high);
       //store the run in the temporary file
       StoreRun(tempFileDesc,pinnedBlocks,bufferSize);
   }
@@ -217,7 +222,8 @@ SR_ErrorCode SR_SortedFile(
     iteratedBlocks++;
   }
   //sort the last run
-  QuickSortRun(pinnedBlocks,lastRunSize,fieldNo);
+  //EDW TO HIGH EINAI ALLO E
+  QuickSortRun(pinnedBlocks,bufferSize,fieldNo, low, high);
   //store it
   StoreRun(tempFileDesc,pinnedBlocks,lastRunSize);
 /******************************************************************************
