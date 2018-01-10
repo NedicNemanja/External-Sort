@@ -1,3 +1,4 @@
+#include "heap.h"
 #include "HelperFunctions.h"
 
 //function to decrease an index struct of our quicksort
@@ -154,8 +155,26 @@ void QuickSortRun(BF_Block** blockArray, int size, int fieldNo, Index low, Index
 	}
 }
 
-void HeapSortRun(BF_Block** blockArray, int size, int fieldNo){
+//initialize offsets array with specific offset
+void init_offsets(int *offsets, int size, int offset){
+	offsets = malloc(size*sizeof(int));
+	for(int i=size=1; i>=0; i--)
+		offsets[i] = offset;
+}
 
+//NEME VALE ENA FILE EDO NA GRAFO
+void HeapSortRun(BF_Block** blockArray, int size, int fieldNo /*,file*/){
+	int *offsets = NULL;
+	heap theheap;
+	//makeheap(blockArray,size, fieldNo, &theheap);
+	while(theheap.size >0){
+		//writeroot to fileDesc
+		//swap(theheap, 0, theheap->size);
+		//insert
+		break; //remove this, it's only for compilation
+	}
+	//destroyheap(&theheap);
+	free(offsets);
 }
 
 

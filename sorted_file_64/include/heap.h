@@ -1,15 +1,21 @@
 #ifndef HEAP_H
 #define HEAP_H
 
-typdef struct heapnode{
-  unsigned int i;
+#include "bf.h"
+
+typedef struct heapnode{
+  int i; //where this node came from
   char * data;
-  unsigned int offset;
+  int offset;
 }heapnode;
 
 typedef struct heap{
-  unsigned int size;
-  heapnode * nodes;
+  int size;
+  heapnode *nodes;
 }heap;
+
+void makeheap(BF_Block** array, int size, int fieldNo, heap* theheap);
+
+void destroyheap(heap* theheap);
 
 #endif

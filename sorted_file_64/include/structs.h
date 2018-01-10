@@ -1,5 +1,5 @@
-#ifndef OURSTRUCTS
-#define OURSTRUCTS
+#ifndef STRUCTS_H
+#define STRUCTS_H
 typedef struct Record {
 	int id;
 	char name[15];
