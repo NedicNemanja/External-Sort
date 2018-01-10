@@ -2,11 +2,13 @@
 #define HEAP_H
 
 #include "bf.h"
+#include "structs.h"
 
 typedef struct heapnode{
   int i; //where this node came from
   char * data;
   int offset;
+  Index index;
 }heapnode;
 
 typedef struct heap{

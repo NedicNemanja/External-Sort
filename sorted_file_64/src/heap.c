@@ -14,7 +14,7 @@ void swap(heap *theheap, int x, int y){
   //athlios pseudokodikas alla neti
   char * temp = theheap->nodes[x]->data+offset;
   theheap->nodes[x] = theheap->nodes[y];
-   theheap->nodes[y] = temp;
+  theheap->nodes[y] = temp;
 }
 
 //THANASARA VALE KANA COMPARE EDO

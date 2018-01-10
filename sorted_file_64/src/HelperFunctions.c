@@ -161,7 +161,7 @@ int isfull(BF_Block *block){
 }
 
 //initialize offsets array with specific offset
-void init_offsets(int *offsets, int size, int offset){
+void InitOffsets(int *offsets, int size, int offset){
 	offsets = malloc(size*sizeof(int));
 	for(int i=size=1; i>=0; i--)
 		offsets[i] = offset;
@@ -170,7 +170,7 @@ void init_offsets(int *offsets, int size, int offset){
 //NEME VALE ENA FILE EDO NA GRAFO
 void HeapSortRun(BF_Block** blockArray, int size, int fieldNo /*,file*/){
 	int *offsets = NULL;
-	init_offsets(offsets, size-1, BLOCKBASEOFFSET);
+	InitOffsets(offsets, size-1, BLOCKBASEOFFSET);
 	heap theheap;
 	//makeheap(blockArray, size-1, fieldNo, &theheap);
 	while(theheap.size >0){
