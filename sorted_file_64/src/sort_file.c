@@ -230,7 +230,33 @@ SR_ErrorCode SR_SortedFile(
 /******************************************************************************
 **************merge the runs and store them in the output_filename*************
 ******************************************************************************/
+  int run_size = bufferSize;
+  BlockCount--; //minus the metadata block
 
+  while(run_size<BlockCount){  //repeat until the whole file is sorted
+    int current_block = 1;
+    int num_of_unmerged_blocks = BlockCount;
+    /*group all the runs*/
+    while(num_of_unmerged_blocks>=run_size){
+      int buffer_index = 0;
+      /*for every run reserve one buffer
+      (exception: maybe the last one is smaller than the others)*/
+      while( && buffer_index<=bufferSize-1){
+        //get the run's 1st block to the buffer
+        BF_GetBlock(tempSortFile,current_block,pinnedBlocks[buffer_index]);
+        buffer_index++;
+        //look at the next run
+        num_of_unmerged_blocks -= run_size;
+        current_block += run_size;
+        //reserve a buffer for that last run aswell
+        if(lastRunSize>0){
+          current_block = current_block - run_size + lastRunSize;
+          BF_GetBlock(tempSortFile,current_block,pinnedBlocks[buffer_index]);
+        }
+
+      }
+    }
+  }
   return SR_OK;
 }
 
