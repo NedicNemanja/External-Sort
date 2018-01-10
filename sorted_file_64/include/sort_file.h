@@ -6,14 +6,9 @@ typedef enum SR_ErrorCode {
   SR_ERROR
 } SR_ErrorCode;
 
-#define BAD_bufferSize -1
+#include "structs.h"
 
-typedef struct Record {
-	int id;
-	char name[15];
-	char surname[20];
-	char city[20];
-} Record;
+#define BAD_bufferSize -1
 
 /*
  * Η συνάρτηση SR_Init χρησιμοποιείται για την αρχικοποίηση του sort_file.
