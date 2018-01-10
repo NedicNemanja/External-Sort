@@ -185,7 +185,7 @@ SR_ErrorCode SR_SortedFile(
   SR_CreateFile("tempSortFile");
   int tempFileDesc;
   SR_OpenFile("tempSortFile",&tempFileDesc);
-  CopyFile(tempSortFile,fileDesc);
+  //CopyFile(tempSortFile,fileDesc);
 
   /*initialize pinnedBlocks:  This is where we keep the BF_Block* of the blocks
                               that are currently pinned.*/

@@ -42,7 +42,7 @@ void makeheap(BF_Block** array, int size, int fieldNo, heap* theheap){
   }
   //heapify from the bottom up
   for(int i=(theheap->size-2)/2; i>=0; i--)
-    heapify(theheap, theheap->size, i, fieldNo);
+    heapify(theheap, theheap->size-1, i, fieldNo);
 }
 
 void destroyheap(heap* theheap){

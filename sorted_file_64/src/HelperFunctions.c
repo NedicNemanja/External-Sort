@@ -155,6 +155,11 @@ void QuickSortRun(BF_Block** blockArray, int size, int fieldNo, Index low, Index
 	}
 }
 
+int isfull(BF_Block *block){
+	//check here if block is full
+	//NEME
+}
+
 //initialize offsets array with specific offset
 void init_offsets(int *offsets, int size, int offset){
 	offsets = malloc(size*sizeof(int));
@@ -165,13 +170,26 @@ void init_offsets(int *offsets, int size, int offset){
 //NEME VALE ENA FILE EDO NA GRAFO
 void HeapSortRun(BF_Block** blockArray, int size, int fieldNo /*,file*/){
 	int *offsets = NULL;
+	init_offsets(offsets, size-1, BLOCKBASEOFFSET);
 	heap theheap;
-	//makeheap(blockArray,size, fieldNo, &theheap);
+	//makeheap(blockArray, size-1, fieldNo, &theheap);
 	while(theheap.size >0){
-		//writeroot to fileDesc
-		//swap(theheap, 0, theheap->size);
-		//insert
-		break; //remove this, it's only for compilation
+		//check if last buffer is full
+		if(isfull(blockArray[size-1])){
+			//flush
+		}
+		//writeroot
+		//swap(theheap, 0, theheap.size-1);
+		//insert from index = theheap.nodes[theheap.size-1].i
+		//if(has_record(blockArray[index]){
+			//insert next to heap
+		//}
+		//else if(next_block){
+			//bring next from run and insert to heap
+		//}
+		//else{
+				//theheap.size--;
+		//}
 	}
 	//destroyheap(&theheap);
 	free(offsets);
