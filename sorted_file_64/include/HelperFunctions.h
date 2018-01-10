@@ -6,6 +6,7 @@
 #include "stdio.h"
 #include <string.h>
 #include "structs.h"
+#include "Run.h"
 
 #define BLOCKBASEOFFSET (5 * sizeof(int))
 #define SIZEOFID (sizeof(int))
@@ -23,7 +24,7 @@ the disk.*/
 void QuickSortRun(BF_Block** blockArray, int size, int fieldNo, Index low, Index high);
 
 /*Sorts blockArray[size] base on the selected fieldNo of the record*/
-void HeapSortRun(BF_Block** blockArray, int size, int fieldNo);
+void HeapSortRun(Run* pinnedRuns,int num_of_runs,int fieldNo,int out_file);
 
 /*store all the runs from pinnedBlocks to fileDesc,
 also unpins all blocks from pinnedBlocks*/

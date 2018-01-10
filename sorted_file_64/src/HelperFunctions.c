@@ -168,7 +168,7 @@ void init_offsets(int *offsets, int size, int offset){
 }
 
 //NEME VALE ENA FILE EDO NA GRAFO
-void HeapSortRun(BF_Block** blockArray, int size, int fieldNo /*,file*/){
+void HeapSortRun(Run* runArray, int size, int fieldNo, int out_fileDesc){
 	int *offsets = NULL;
 	init_offsets(offsets, size-1, BLOCKBASEOFFSET);
 	heap theheap;
