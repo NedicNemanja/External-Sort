@@ -1,7 +1,9 @@
 #include <string.h>
+#include <math.h>
 #include "sort_file.h"
 #include "bf.h"
 #include "HelperFunctions.h"
+#include "Run.h"
 
 SR_ErrorCode SR_Init() {
   // Your code goes here
@@ -183,9 +185,9 @@ SR_ErrorCode SR_SortedFile(
 ******************************************************************************/
   //creating a copy of the input_file so it remains unchanged
   SR_CreateFile("tempSortFile");
-  int tempFileDesc;
-  SR_OpenFile("tempSortFile",&tempFileDesc);
-  //CopyFile(tempSortFile,fileDesc);
+  int tempDesc;
+  SR_OpenFile("tempSortFile",&tempDesc);
+  //CopyFile(tempDesc,fileDesc);
 
   /*initialize pinnedBlocks:  This is where we keep the BF_Block* of the blocks
                               that are currently pinned.*/
@@ -198,17 +200,22 @@ SR_ErrorCode SR_SortedFile(
   BF_GetBlockCounter(fileDesc,&BlockCount);
   iteratedBlocks++; //skip the metadata block
   int lastRunSize = BlockCount%bufferSize;
+
+  /*??????????????????????????????????????????????????????????????????????????
+  ???????????????????????????????????????????????????????????????
+  ??????????????????????????????????????????????????*/
   Index low, high;
   low.blockIndex = 0;
   low.recordIndex = 0;
   high.blockIndex = bufferSize - 1;
   high.recordIndex = (BF_BLOCK_SIZE - BLOCKBASEOFFSET) / SIZEOFRECORD - 1;
+  //????????????????????????????????????????????????????????????????????????
 
   //get,sort and store the runs one by one
   while(iteratedBlocks < BlockCount-lastRunSize){
       //get the run to the buffers
       for(int i=0; i<bufferSize; i++){
-        BF_GetBlock(tempFileDesc,iteratedBlocks,pinnedBlocks[i]);
+        BF_GetBlock(tempDesc,iteratedBlocks,pinnedBlocks[i]);
         iteratedBlocks++;
       }
       //sort the run
@@ -222,7 +229,7 @@ SR_ErrorCode SR_SortedFile(
   //***do the last run as well***
   //get the last run to the buffers
   for(int i=0; i<lastRunSize; i++){
-    BF_GetBlock(fileDesc,iteratedBlocks,pinnedBlocks[i]);
+    BF_GetBlock(tempDesc,iteratedBlocks,pinnedBlocks[i]);
     iteratedBlocks++;
   }
   //sort the last run
@@ -236,6 +243,67 @@ SR_ErrorCode SR_SortedFile(
 /******************************************************************************
 **************merge the runs and store them in the output_filename*************
 ******************************************************************************/
+  int run_size = bufferSize;
+  BlockCount--; //minus the metadata block
+  int in_file=tempDesc; //this is where we get runs from
+  int out_file;         //this is where we store runs to
+  SR_CreateFile("tempFile");
+  SR_OpenFile("tempFile",&out_file);
+  int m = (int)ceil( (double)BlockCount/(double)bufferSize );
+  int iterations = (int)(log(bufferSize-1)/log(m));
+
+  /*initialize pinnedRuns:  This is where we keep the Runs
+                            that are currently pinned.*/
+  Run* pinnedRuns[bufferSize-1];
+
+  int iteration=1;
+  /*repeat until the whole file is sorted,
+  but hold on for the last iteration,i want to save it specifically to out_file*/
+  while(iteration<iterations){
+    int current_block_id = 1;
+    int num_of_unmerged_blocks = BlockCount;
+    int runs_in_file = (int)ceil((double)BlockCount/(double)run_size);
+    int groups_in_file = (int)ceil((double)runs_in_file/(double)(bufferSize-1));
+
+    /*group the runs in (bufferSize-1) groups*
+    exception: the last run of the last group*/
+    for(int g=0; g<groups_in_file-1; g++){
+      /*for every run of the group*/
+      for(int buffer_index=0; buffer_index<=bufferSize-1; buffer_index++){
+        //pin a run and dedicate a buffer to it
+        pinnedRuns[buffer_index] = Run_init(in_file,current_block_id,run_size);
+        //look at the next run
+        num_of_unmerged_blocks -= run_size;
+        current_block_id += run_size;
+      }
+      //The buffers are full now. Just one block is left for the output.
+      //Lets sort and store this group of runs
+      HeapSortRun(pinnedRuns,bufferSize-1,fieldNo,out_file);
+    }
+    /*Exception: last group with the last run*/
+    for(int buffer_index=0; buffer_index<=bufferSize-1; buffer_index++){
+      //pin a run and dedicate a buffer to it
+      pinnedRuns[buffer_index] = Run_init(in_file,current_block_id,run_size);
+      //look at the next run
+      num_of_unmerged_blocks -= run_size;
+      //if this is the last run
+      if(num_of_unmerged_blocks == lastRunSize){
+        current_block_id += lastRunSize;
+        pinnedRuns[buffer_index] = Run_init(in_file,current_block_id,lastRunSize);
+        break;
+      }
+      else
+        current_block_id += run_size;
+    }
+    //The buffers are full now. Just one block is left for the output.
+    //Lets sort and store the LAST group of runs for this iteration
+    HeapSortRun(pinnedRuns,bufferSize-1,fieldNo,out_file);
+
+    //flush and prepare for next iteration
+    //pinnedRunsDestroy();
+    run_size = run_size*(bufferSize-1);
+    iteration++;
+  }
 
   return SR_OK;
 }
