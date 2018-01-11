@@ -24,7 +24,7 @@ the disk.*/
 void QuickSortRun(BF_Block** blockArray, int size, int fieldNo, Index low, Index high);
 
 /*Sorts blockArray[size] base on the selected fieldNo of the record*/
-void HeapSortRun(Run* pinnedRuns,int num_of_runs,int fieldNo,int out_file);
+void HeapSortRun(Run** pinnedRuns,int num_of_runs,int fieldNo,int out_file);
 
 /*store all the runs from pinnedBlocks to fileDesc,
 also unpins all blocks from pinnedBlocks*/

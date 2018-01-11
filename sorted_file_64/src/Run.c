@@ -13,7 +13,6 @@ Run* Run_init(int fileDesc, int current_block_id, int run_size){
 
 void Run_NextBlock(Run* run){
   BF_UnpinBlock(run->pinnedBlock);
-  //checkare edo
   run->pinnedBlock_id++;
   BF_GetBlock(run->fileDesc, run->pinnedBlock_id, run->pinnedBlock);
 }

@@ -284,18 +284,18 @@ SR_ErrorCode SR_SortedFile(
       }
       //The buffers are full now. Just one block is left for the output.
       //Lets sort and store this group of runs
-      //HeapSortRun(pinnedRuns,bufferSize-1,fieldNo,out_file);
+      HeapSortRun(pinnedRuns,bufferSize-1,fieldNo,out_file);
     }
     /*Exception: last group with the last run*/
     for(int buffer_index=0; buffer_index<=bufferSize-1; buffer_index++){
       //pin a run and dedicate a buffer to it
-    //pinnedRuns[buffer_index] = Run_init(in_file,current_block_id,run_size);
+      pinnedRuns[buffer_index] = Run_init(in_file,current_block_id,run_size);
       //look at the next run
       num_of_unmerged_blocks -= run_size;
       //if this is the last run
       if(num_of_unmerged_blocks == lastRunSize){
         current_block_id += lastRunSize;
-    //pinnedRuns[buffer_index] = Run_init(in_file,current_block_id,lastRunSize);
+        pinnedRuns[buffer_index] = Run_init(in_file,current_block_id,lastRunSize);
         break;
       }
       else
@@ -303,7 +303,7 @@ SR_ErrorCode SR_SortedFile(
     }
     //The buffers are full now. Just one block is left for the output.
     //Lets sort and store the LAST group of runs for this iteration
-    //HeapSortRun(pinnedRuns,bufferSize-1,fieldNo,out_file);
+    HeapSortRun(pinnedRuns,bufferSize-1,fieldNo,out_file);
 
     /*Flush and prepare for next iteration*/
     //pinnedRunsDestroy();
