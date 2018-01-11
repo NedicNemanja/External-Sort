@@ -222,6 +222,7 @@ SR_ErrorCode SR_SortedFile(
       QuickSortRun(pinnedBlocks,bufferSize,fieldNo, low, high);
       //store the sorted run back to the temp_file
       for(int i=0; i<bufferSize; i++){
+        BF_Block_SetDirty(pinnedBlocks[i]);
         BF_UnpinBlock(pinnedBlocks[i]);
         pinnedBlocks[i] = NULL;
       }
@@ -237,8 +238,13 @@ SR_ErrorCode SR_SortedFile(
   QuickSortRun(pinnedBlocks,bufferSize,fieldNo, low, high);
   //store it
   for(int i=0; i<lastRunSize; i++){
+    BF_Block_SetDirty(pinnedBlocks[i]);
     BF_UnpinBlock(pinnedBlocks[i]);
     pinnedBlocks[i] = NULL;
+  }
+  //destroy pinnedBlocks to free the buffers
+  for(int i=0; i<bufferSize; i++){
+    BF_Block_Destroy(&pinnedBlocks[i]);
   }
 /******************************************************************************
 **************merge the runs and store them in the output_filename*************
@@ -299,8 +305,14 @@ SR_ErrorCode SR_SortedFile(
     //Lets sort and store the LAST group of runs for this iteration
     HeapSortRun(pinnedRuns,bufferSize-1,fieldNo,out_file);
 
-    //flush and prepare for next iteration
+    /*Flush and prepare for next iteration*/
     //pinnedRunsDestroy();
+
+    //in_file destroy
+    in_file = out_file;
+    SR_CreateFile("tempFile");
+    SR_OpenFile("tempFile",&out_file);
+
     run_size = run_size*(bufferSize-1);
     iteration++;
   }
