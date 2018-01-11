@@ -13,7 +13,7 @@ Run* Run_init(int fileDesc, int current_block_id, int run_size){
 
 void Run_NextBlock(Run* run){
   BF_UnpinBlock(run->pinnedBlock);
-  if(--size ==0){
+  if(--run->size == 0){
     return;
   }
   run->pinnedBlock_id++;

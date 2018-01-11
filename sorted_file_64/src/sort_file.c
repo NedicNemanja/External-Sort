@@ -207,7 +207,7 @@ SR_ErrorCode SR_SortedFile(
   /*??????????????????????????????????????????????????????????????????????????
   ???????????????????????????????????????????????????????????????
   ??????????????????????????????????????????????????*/
-  
+
   //????????????????????????????????????????????????????????????????????????
 
   //get,sort and store the runs one by one
@@ -252,9 +252,10 @@ SR_ErrorCode SR_SortedFile(
   int run_size = bufferSize;
   BlockCount--; //minus the metadata block
   int in_file=tempDesc; //this is where we get runs from
-  int out_file;         //this is where we store runs to
-  SR_CreateFile("tempFile");
-  SR_OpenFile("tempFile",&out_file);
+  int out_file;         //this is where we store merged runs to
+  SR_CreateFile("outFile1");
+  SR_OpenFile("outFile1",&out_file);
+  //arithmetics to determine how many iterations we'll need to sort the file
   int m = (int)ceil( (double)BlockCount/(double)bufferSize );
   int iterations = (int)(log(bufferSize-1)/log(m));
 
@@ -262,60 +263,49 @@ SR_ErrorCode SR_SortedFile(
                             that are currently pinned.*/
   Run* pinnedRuns[bufferSize-1];
 
-  int iteration=1;
-  /*repeat until the whole file is sorted,
-  but hold on for the last iteration,i want to save it specifically to out_file*/
-  while(iteration<iterations){
+  /*Sort the whole file into bigger runs.
+   Repeat until the whole file is a sorted run,
+   but hold on for the last iteration,
+   i want to save it specifically to out_file*/
+  for(int iteration=0; iteration<iterations-1; iteration++){
     int current_block_id = 1;
     int num_of_unmerged_blocks = BlockCount;
+    //total number of runs in the file
     int runs_in_file = (int)ceil((double)BlockCount/(double)run_size);
+    //number of run-groups
     int groups_in_file = (int)ceil((double)runs_in_file/(double)(bufferSize-1));
+    //group size in blocks
+    int group_size = run_size*(bufferSize-1);
 
-    /*group the runs in (bufferSize-1) groups*
-    exception: the last run of the last group*/
-    for(int g=0; g<groups_in_file-1; g++){
-      /*for every run of the group*/
-      for(int buffer_index=0; buffer_index<=bufferSize-1; buffer_index++){
-        //pin a run and dedicate a buffer to it
-        pinnedRuns[buffer_index] = Run_init(in_file,current_block_id,run_size);
-        //look at the next run
-        num_of_unmerged_blocks -= run_size;
-        current_block_id += run_size;
-      }
+    /*load,sort,store all the groups one by one*/
+    for(int g=0; g<groups_in_file; g++){
+      /*load group to the buffers*/
+      PinGroup(pinnedRuns,bufferSize-1,in_file,&current_block_id,run_size,
+                          &num_of_unmerged_blocks,lastRunSize,bufferSize);
       //The buffers are full now. Just one block is left for the output.
       //Lets sort and store this group of runs
-      HeapSortRun(pinnedRuns,bufferSize-1,fieldNo,out_file);
+      SortAndStoreRuns(pinnedRuns,bufferSize-1,fieldNo,out_file);
+      //clean the pinnedRuns array
+      UnpinGroup(pinnedRuns,bufferSize-1);
     }
-    /*Exception: last group with the last run*/
-    for(int buffer_index=0; buffer_index<=bufferSize-1; buffer_index++){
-      //pin a run and dedicate a buffer to it
-      pinnedRuns[buffer_index] = Run_init(in_file,current_block_id,run_size);
-      //look at the next run
-      num_of_unmerged_blocks -= run_size;
-      //if this is the last run
-      if(num_of_unmerged_blocks == lastRunSize){
-        current_block_id += lastRunSize;
-        pinnedRuns[buffer_index] = Run_init(in_file,current_block_id,lastRunSize);
-        break;
-      }
-      else
-        current_block_id += run_size;
-    }
-    //The buffers are full now. Just one block is left for the output.
-    //Lets sort and store the LAST group of runs for this iteration
-    HeapSortRun(pinnedRuns,bufferSize-1,fieldNo,out_file);
 
     /*Flush and prepare for next iteration*/
-    //pinnedRunsDestroy();
-
+    SR_CloseFile(in_file);
     //in_file destroy
     in_file = out_file;
-    SR_CreateFile("tempFile");
-    SR_OpenFile("tempFile",&out_file);
-
-    run_size = run_size*(bufferSize-1);
-    iteration++;
+    //create a new out_file named "outFile*here_goes_iteration_number*"
+    char* new_file_name = "outFile";
+    char file_serial_num[10];
+    snprintf(file_serial_num, 10, "%d", iteration);//iteration as a string
+    strcat(new_file_name,file_serial_num);  //example "outFile16"
+    SR_CreateFile(new_file_name);
+    SR_OpenFile(new_file_name,&out_file);
+    //run have been merged in groups, the new run is a whole group
+    run_size = group_size;
   }
+
+  /*The last iteration is done separately so that we can control the out_file*/
+
 
   return SR_OK;
 }

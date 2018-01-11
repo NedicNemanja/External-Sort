@@ -221,7 +221,7 @@ void InitOffsets(int *offsets, int size, int offset){
 }
 
 //NEME VALE ENA FILE EDO NA GRAFO
-void HeapSortRun(Run** runArray, int size, int fieldNo, int outFileDesc){
+void SortAndStoreRuns(Run** runArray, int size, int fieldNo, int out_fileDesc){
 	int *offsets = NULL, end=0, min, recs;
 	char *target = NULL;
 	BF_Block *outBlock = NULL;
@@ -237,19 +237,24 @@ void HeapSortRun(Run** runArray, int size, int fieldNo, int outFileDesc){
 			//allocate a new one
 			BF_Block_SetDirty(outBlock);
 			BF_UnpinBlock(outBlock);
-			BF_AllocateBlock(outFileDesc, outBlock);
+			BF_AllocateBlock(out_fileDesc, outBlock);
 		}
 
 		min = 0;
+		//find a min and if you don't find, break;
+		while(runArray[min]->pinnedBlock == NULL && min <size)
+			min++;
+		if(min >= size) break;
+
 		Record *minRec = (Record *) BF_Block_GetData(runArray[min]->pinnedBlock) + offsets[min];
-		for(int i=1; i<size-1; i++){
+		for(int i=min; i<size; i++){
 			if(runArray[i]->pinnedBlock == NULL){
 				continue;
 			}
 			else{
 				//check here if block is at end
 				if(isFinished(offsets[i])){
-					
+
 				}
 				Record *tRec = (Record *) BF_Block_GetData(runArray[i]->pinnedBlock) + offsets[i];
 				if(recordLessThan(tRec, minRec, fieldNo)){
@@ -283,7 +288,10 @@ void HeapSortRun(Run** runArray, int size, int fieldNo, int outFileDesc){
 				//theheap.size--;
 		//}
 
+	//cleanup
 	//destroyheap(&theheap);
+	BF_Block_SetDirty(outBlock);
+	BF_UnpinBlock(outBlock);
 	BF_Block_Destroy(&outBlock);
 	free(offsets);
 }
@@ -314,4 +322,32 @@ int copyFile(const char *inputFileName, char * outputFileName){
     close(input);
     //close(output);
     return output;
+}
+
+
+void PinGroup(Run** pinnedRuns,int num_of_runs,
+						int in_file,int* current_block_id,int run_size,
+						int* num_of_unmerged_blocks,int lastRunSize, int bufferSize){
+	for(int buffer_index=0; buffer_index<=bufferSize-1; buffer_index++){
+		//pin a run and dedicate a buffer to it
+		pinnedRuns[buffer_index] = Run_init(in_file,*current_block_id,run_size);
+		//mark this run as merged
+		*num_of_unmerged_blocks -= run_size;
+		//if only the last run is left
+		if(*num_of_unmerged_blocks == lastRunSize){
+			*current_block_id += lastRunSize;
+			pinnedRuns[buffer_index] = Run_init(in_file,*current_block_id,lastRunSize);
+			*num_of_unmerged_blocks -= lastRunSize;
+			break;
+		}
+		else
+			*current_block_id += run_size;
+	}
+}
+
+void UnpinGroup(Run** pinnedRuns,int num_of_runs){
+	for(int i=0; i<num_of_runs;i++){
+		Run_destroy(pinnedRuns[i]);
+		pinnedRuns[i] = NULL;
+	}
 }
