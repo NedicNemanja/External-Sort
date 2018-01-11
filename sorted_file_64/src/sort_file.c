@@ -277,7 +277,7 @@ SR_ErrorCode SR_SortedFile(
       /*for every run of the group*/
       for(int buffer_index=0; buffer_index<=bufferSize-1; buffer_index++){
         //pin a run and dedicate a buffer to it
-        pinnedRuns[buffer_index] = Run_init(in_file,current_block_id,run_size);
+        //pinnedRuns[buffer_index] = Run_init(in_file,current_block_id,run_size);
         //look at the next run
         num_of_unmerged_blocks -= run_size;
         current_block_id += run_size;
@@ -289,13 +289,13 @@ SR_ErrorCode SR_SortedFile(
     /*Exception: last group with the last run*/
     for(int buffer_index=0; buffer_index<=bufferSize-1; buffer_index++){
       //pin a run and dedicate a buffer to it
-      pinnedRuns[buffer_index] = Run_init(in_file,current_block_id,run_size);
+    //pinnedRuns[buffer_index] = Run_init(in_file,current_block_id,run_size);
       //look at the next run
       num_of_unmerged_blocks -= run_size;
       //if this is the last run
       if(num_of_unmerged_blocks == lastRunSize){
         current_block_id += lastRunSize;
-        pinnedRuns[buffer_index] = Run_init(in_file,current_block_id,lastRunSize);
+    //pinnedRuns[buffer_index] = Run_init(in_file,current_block_id,lastRunSize);
         break;
       }
       else
