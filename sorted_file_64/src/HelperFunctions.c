@@ -202,9 +202,15 @@ void quickSort(BF_Block** blockArray, int size, int fieldNo, int lastRun, int la
 	QuickSortRun(blockArray,size,fieldNo, low, high);
 }
 
-int isfull(BF_Block *block){
-	//check here if block is full
-	//NEME
+int isFull(BF_Block *block){
+	int recs =0;
+	char * data = BF_Block_GetData(block);
+	memmove(&recs, data+4*sizeof(int), sizeof(int));
+	return BF_BLOCK_SIZE - BLOCKBASEOFFSET+(recs+1)*SIZEOFRECORD >= 0 ? 0 : 1;
+}
+
+int isFinished(int offset){
+	return BF_BLOCK_SIZE -offset -SIZEOFRECORD < 0 ? 1 : 0;
 }
 
 //initialize offsets array with specific offset
@@ -218,24 +224,35 @@ void InitOffsets(int *offsets, int size, int offset){
 void SortAndStoreRuns(Run** runArray, int size, int fieldNo, int out_fileDesc){
 	int *offsets = NULL, end=0, min, recs;
 	char *target = NULL;
+	BF_Block *outBlock = NULL;
 	InitOffsets(offsets, size, BLOCKBASEOFFSET);
+	BF_Block_Init(&outBlock);
 	//heap theheap;
 	//makeheap(blockArray, size-1, fieldNo, &theheap);
 	//while(theheap.size >0){
 
 	while(!end){
 		//check if last buffer is full
-		if(isfull(runArray[size-1].pinnedBlock)){
+		if(isFull(outBlock)){
 			//allocate a new one
+			BF_Block_SetDirty(outBlock);
+			BF_UnpinBlock(outBlock);
+			BF_AllocateBlock(out_fileDesc, outBlock);
 		}
+
 		min = 0;
-		Record *minRec = (Record *) BF_Block_GetData(runArray[min].pinnedBlock) + offsets[min];
+		Record *minRec = (Record *) BF_Block_GetData(runArray[min]->pinnedBlock) + offsets[min];
 		for(int i=1; i<size-1; i++){
-			//check here if block is at end
-			Record *tRec = (Record *) BF_Block_GetData(runArray[i].pinnedBlock) + offsets[i];
-			if(recordLessThan(tRec, minRec, fieldNo)){
-				min = i;
-				minRec = tRec;
+			if(runArray[i]->pinnedBlock == NULL){
+				continue;
+			}
+			else{
+				//check here if block is at end
+				Record *tRec = (Record *) BF_Block_GetData(runArray[i]->pinnedBlock) + offsets[i];
+				if(recordLessThan(tRec, minRec, fieldNo)){
+					min = i;
+					minRec = tRec;
+				}
 			}
 		}
 
@@ -264,6 +281,7 @@ void SortAndStoreRuns(Run** runArray, int size, int fieldNo, int out_fileDesc){
 		//}
 
 	//destroyheap(&theheap);
+	BF_Block_Destroy(&outBlock);
 	free(offsets);
 }
 
