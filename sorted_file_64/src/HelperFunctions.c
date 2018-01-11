@@ -179,7 +179,29 @@ void QuickSortRun(BF_Block** blockArray, int size, int fieldNo, Index low, Index
 	}
 }
 
-//check if block is full
+void quickSort(BF_Block** blockArray, int size, int fieldNo, int lastRun, int lastRunSize){
+	Index low, high;
+	char *data = NULL;
+	int offset = 4 * sizeof(int);
+
+	low.blockIndex = 0;
+	low.recordIndex = 0;
+
+	if (lastRun)
+	{
+		high.blockIndex = lastRunSize - 1;
+
+		data = BF_Block_GetData(blockArray[lastRunSize]);
+		memmove(&(high.recordIndex), data + offset, sizeof(int));
+		high.recordIndex--;
+	}else{
+		high.blockIndex = size - 1;
+		high.recordIndex = (BF_BLOCK_SIZE - BLOCKBASEOFFSET) / SIZEOFRECORD - 1;
+	}
+
+	QuickSortRun(blockArray,size,fieldNo, low, high);
+}
+
 int isFull(BF_Block *block){
 	int recs =0;
 	char * data = BF_Block_GetData(block);
@@ -275,4 +297,18 @@ void StoreRun(int fileDesc, BF_Block** pinnedBlocks, int run_size){
 
 void InsertBlock(int fileDesc, BF_Block* block){
 
+}
+
+int copyFile(const char *inputFileName, char * outputFileName){
+	int input = open(inputFileName, O_RDONLY, 0);
+	int output = open(outputFileName, O_WRONLY | O_CREAT, 0644);
+
+	struct stat stat_source;
+    fstat(input, &stat_source);
+
+    sendfile(output, input, 0, stat_source.st_size);
+
+    close(input);
+    //close(output);
+    return output;
 }
