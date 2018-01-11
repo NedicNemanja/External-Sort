@@ -1,5 +1,6 @@
-#include "Run.h"
 #include <stdlib.h>
+
+#include "Run.h"
 
 Run* Run_init(int fileDesc, int current_block_id, int run_size){
   Run* run = malloc(sizeof(Run));
@@ -7,6 +8,7 @@ Run* Run_init(int fileDesc, int current_block_id, int run_size){
   BF_GetBlock(fileDesc,current_block_id,run->pinnedBlock);
   run->size = run_size;
   run->pinnedBlock_id = current_block_id;
+  return run;
 }
 
 void Run_NextBlock(Run* run){

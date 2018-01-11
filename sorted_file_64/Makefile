@@ -10,7 +10,7 @@ sr_main2:
 
 sr_main3:
 	@echo " Compile sr_main3 ...";
-	gcc -I ./include/ -L ./lib/ -Wl,-rpath,./lib/ ./examples/sr_main3.c ./src/sort_file.c ./src/HelperFunctions.c -lbf -o ./build/sr_main3 -lm
+	gcc -I ./include/ -L ./lib/ -Wl,-rpath,./lib/ ./examples/sr_main3.c ./src/sort_file.c ./src/HelperFunctions.c ./src/Run.c -lbf -o ./build/sr_main3 -lm
 
 
 bf:
