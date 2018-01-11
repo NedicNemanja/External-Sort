@@ -1,5 +1,7 @@
 #include "heap.h"
 #include "HelperFunctions.h"
+#include "Run.h"
+#include "structs.h"
 
 //function to decrease an index struct of our quicksort
 Index indexDecr(Index index){
@@ -105,6 +107,28 @@ int recordLessEqualThan(Record tmpRecord, Record pivot, int fieldNo){
 			return 0;
 	}
 }
+
+int recordLessThan(Record *tmpRecord, Record *pivot, int fieldNo){
+	switch (fieldNo){
+		case 0:
+			if (tmpRecord->id < pivot->id)
+				return 1;
+			return 0;
+		case 1:
+			if (strcmp(tmpRecord->name, pivot->name) < 0)
+				return 1;
+			return 0;
+		case 2:
+			if (strcmp(tmpRecord->surname, pivot->surname) < 0)
+				return 1;
+			return 0;
+		case 3:
+			if (strcmp(tmpRecord->city, pivot->city) < 0)
+				return 1;
+			return 0;
+	}
+}
+
 //function to swap the values of the record with index i with the record with index j
 void recordSwap(BF_Block** blockArray, int size, Index i, Index j){
 	//get the two records in two temp variables
@@ -163,21 +187,46 @@ int isfull(BF_Block *block){
 //initialize offsets array with specific offset
 void InitOffsets(int *offsets, int size, int offset){
 	offsets = malloc(size*sizeof(int));
-	for(int i=size=1; i>=0; i--)
-		offsets[i] = offset;
+	for(int i=size-1; i>=0; i--)
+		offsets[i] = 0;
 }
 
 //NEME VALE ENA FILE EDO NA GRAFO
 void HeapSortRun(Run* runArray, int size, int fieldNo, int out_fileDesc){
-	int *offsets = NULL;
-	InitOffsets(offsets, size-1, BLOCKBASEOFFSET);
-	heap theheap;
+	int *offsets = NULL, end=0, min, recs;
+	char *target = NULL;
+	InitOffsets(offsets, size, BLOCKBASEOFFSET);
+	//heap theheap;
 	//makeheap(blockArray, size-1, fieldNo, &theheap);
-	while(theheap.size >0){
+	//while(theheap.size >0){
+
+	while(!end){
 		//check if last buffer is full
-		if(isfull(blockArray[size-1])){
-			//flush
+		if(isfull(runArray[size-1].pinnedBlock)){
+			//allocate a new one
 		}
+		min = 0;
+		Record *minRec = (Record *) BF_Block_GetData(runArray[min].pinnedBlock) + offsets[min];
+		for(int i=1; i<size-1; i++){
+			//check here if block is at end
+			Record *tRec = (Record *) BF_Block_GetData(runArray[i].pinnedBlock) + offsets[i];
+			if(recordLessThan(tRec, minRec, fieldNo)){
+				min = i;
+				minRec = tRec;
+			}
+		}
+
+		//move the record to the sorted buffer and increment offsets
+		memmove(target+offsets[size-1], minRec, SIZEOFRECORD);
+		offsets[min] += SIZEOFRECORD;
+		offsets[size-1] += SIZEOFRECORD;
+		//increment the number of recs in buffer
+		memmove(&recs, target, sizeof(int));
+		recs++;
+		memmove(target, &recs, sizeof(int));
+	}
+
+		//THIS IS HEAPSORT
 		//writeroot
 		//swap(theheap, 0, theheap.size-1);
 		//insert from index = theheap.nodes[theheap.size-1].i
@@ -190,7 +239,7 @@ void HeapSortRun(Run* runArray, int size, int fieldNo, int out_fileDesc){
 		//else{
 				//theheap.size--;
 		//}
-	}
+
 	//destroyheap(&theheap);
 	free(offsets);
 }
