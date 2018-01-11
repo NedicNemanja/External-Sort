@@ -215,7 +215,7 @@ void InitOffsets(int *offsets, int size, int offset){
 }
 
 //NEME VALE ENA FILE EDO NA GRAFO
-void HeapSortRun(Run* runArray, int size, int fieldNo, int out_fileDesc){
+void SortAndStoreRuns(Run** runArray, int size, int fieldNo, int out_fileDesc){
 	int *offsets = NULL, end=0, min, recs;
 	char *target = NULL;
 	InitOffsets(offsets, size, BLOCKBASEOFFSET);
@@ -293,4 +293,32 @@ int copyFile(const char *inputFileName, char * outputFileName){
     close(input);
     //close(output);
     return output;
+}
+
+
+void PinGroup(Run** pinnedRuns,int num_of_runs,
+						int in_file,int* current_block_id,int run_size,
+						int* num_of_unmerged_blocks,int lastRunSize, int bufferSize){
+	for(int buffer_index=0; buffer_index<=bufferSize-1; buffer_index++){
+		//pin a run and dedicate a buffer to it
+		pinnedRuns[buffer_index] = Run_init(in_file,*current_block_id,run_size);
+		//mark this run as merged
+		*num_of_unmerged_blocks -= run_size;
+		//if only the last run is left
+		if(*num_of_unmerged_blocks == lastRunSize){
+			*current_block_id += lastRunSize;
+			pinnedRuns[buffer_index] = Run_init(in_file,*current_block_id,lastRunSize);
+			*num_of_unmerged_blocks -= lastRunSize;
+			break;
+		}
+		else
+			*current_block_id += run_size;
+	}
+}
+
+void UnpinGroup(Run** pinnedRuns,int num_of_runs){
+	for(int i=0; i<num_of_runs;i++){
+		Run_destroy(pinnedRuns[i]);
+		pinnedRuns[i] = NULL;
+	}
 }

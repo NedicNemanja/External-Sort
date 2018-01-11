@@ -29,7 +29,7 @@ the disk.*/
 void QuickSortRun(BF_Block** blockArray, int size, int fieldNo, Index low, Index high);
 
 /*Sorts blockArray[size] base on the selected fieldNo of the record*/
-void HeapSortRun(Run* pinnedRuns,int num_of_runs,int fieldNo,int out_file);
+void SortAndStoreRuns(Run** pinnedRuns,int num_of_runs,int fieldNo,int out_file);
 
 /*store all the runs from pinnedBlocks to fileDesc,
 also unpins all blocks from pinnedBlocks*/
@@ -42,5 +42,13 @@ void InsertBlock(int fileDesc, BF_Block* block);
 int copyFile(const char *inputFileName, char * outputFileName);
 
 void quickSort(BF_Block** blockArray, int size, int fieldNo, int lastRun, int lastRunSize);
+
+//load a group of runs to the buffer
+void PinGroup(Run** pinnedRuns,int num_of_runs,
+            int in_file,int* current_block_id,int run_size,
+            int* num_of_unmerged_blocks,int lastRunSize,int bufferSize);
+
+//undoes PinRuns()
+void UnpinGroup(Run** pinnedRuns,int num_of_runs);
 
 #endif
