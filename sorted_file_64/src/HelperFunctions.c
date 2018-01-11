@@ -248,6 +248,9 @@ void HeapSortRun(Run** runArray, int size, int fieldNo, int outFileDesc){
 			}
 			else{
 				//check here if block is at end
+				if(isFinished(offsets[i])){
+					
+				}
 				Record *tRec = (Record *) BF_Block_GetData(runArray[i]->pinnedBlock) + offsets[i];
 				if(recordLessThan(tRec, minRec, fieldNo)){
 					min = i;
