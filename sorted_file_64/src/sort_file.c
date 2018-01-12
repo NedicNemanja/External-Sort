@@ -186,10 +186,10 @@ SR_ErrorCode SR_SortedFile(
   //creating a copy of the input_file so it remains unchanged
   //SR_CreateFile("tempSortFile");
   int tempDesc;
-  //SR_OpenFile("tempSortFile",&tempDesc);
-  //CopyFile(tempDesc,fileDesc);
+  SR_OpenFile("tempSortFile", &tempDesc);
+  CopyFile(tempDesc,fileDesc);
   //TO COPY GINETE LOW LEVEL BYTE PER BYTE XWRIS SR CREATE FILE KLP NA DEN LITOURGISEI TO KANOUME HIGH LEVEL
-  tempDesc = copyFile(input_filename, "tempSortFile");
+  //tempDesc = copyFile(input_filename, "tempSortFile");
   //EPISIS O TEMPDESC EPISTREFETE ANOIXTOS, NA KLEISTEI KAPOU PIO KATW
 
   /*initialize pinnedBlocks:  This is where we keep the BF_Block* of the blocks

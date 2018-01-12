@@ -312,7 +312,7 @@ void InsertBlock(int fileDesc, BF_Block* block){
 
 }
 
-int copyFile(int fileDesc1, int fileDesc2){
+int CopyFile(int fileDesc1, int fileDesc2){
 	int blocks = 0, offset = 0, recs = 0;
 	int rsize = sizeof(Record);
 	char *data1 = NULL, *data2 = NULL;
@@ -339,7 +339,7 @@ int copyFile(int fileDesc1, int fileDesc2){
 
 	//for all blocks
 	for(int i=1; i<blocks; i++){
-		if(BF_GetBlock(fileDesc, i, block1) != BF_OK)
+		if(BF_GetBlock(fileDesc1, i, block1) != BF_OK)
 			fprintf(stderr, "Something went wrong\n");
 		if(BF_AllocateBlock(fileDesc2, block2) != BF_OK)
 			fprintf(stderr, "Something went wrong2\n");
@@ -382,10 +382,10 @@ int copyFile(int fileDesc1, int fileDesc2){
 		BF_Block_SetDirty(block2);
 		BF_UnpinBlock(block2);
 		BF_UnpinBlock(block1);
-		printf("\n\n");
 	}
 	BF_Block_Destroy(&block2);
 	BF_Block_Destroy(&block1);
+	return 1;
 }
 
 
