@@ -1,5 +1,6 @@
-#include <string.h>
 #include <math.h>
+#include <stdlib.h>
+#include <string.h>
 #include "sort_file.h"
 #include "bf.h"
 #include "HelperFunctions.h"
