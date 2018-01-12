@@ -355,7 +355,6 @@ void SortAndStoreRuns(Run** runArray, int size, int fieldNo, int out_fileDesc){
 	BF_UnpinBlock(outBlock);
 	BF_Block_Destroy(&outBlock);
 	free(offsets);
-	SR_PrintAllEntries(out_fileDesc);
 }
 
 

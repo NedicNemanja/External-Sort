@@ -398,3 +398,33 @@ SR_ErrorCode SR_PrintAllEntries(int fileDesc) {
 
   return SR_OK;
 }
+
+int SR_DestroyIndex(char *fileName) {
+  BF_Block *tmpBlock;
+  BF_Block_Init(&tmpBlock);
+
+  int fileDesc;
+  char *data = NULL;
+
+
+  BF_OpenFile(fileName, &fileDesc);
+
+  BF_GetBlock(fileDesc, 0, tmpBlock);//Getting the first block
+  data = BF_Block_GetData(tmpBlock);//and its data
+
+  if (data == NULL || strcmp(data, "sort"))//to check if this new opened file is a sort file
+  {
+    BF_UnpinBlock(tmpBlock);
+    BF_Block_Destroy(&tmpBlock);
+    BF_CloseFile(fileDesc);
+    printf("File: %s to destroy is not a sort tree file. Exiting..\n", fileName);
+    exit(-1);
+  }
+
+  BF_UnpinBlock(tmpBlock);
+  BF_Block_Destroy(&tmpBlock);
+  BF_CloseFile(fileDesc);
+
+  remove(fileName);
+  return 1;
+}
