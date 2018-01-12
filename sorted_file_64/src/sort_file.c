@@ -306,6 +306,58 @@ SR_ErrorCode SR_SortedFile(
 
 SR_ErrorCode SR_PrintAllEntries(int fileDesc) {
   // Your code goes here
+  int blocks = 0, offset = 0, recs = 0;
+  int rsize = sizeof(Record);
+  char * data = NULL;
+  BF_Block * block = NULL;
+  int id_size = 0;
+  int name_size = 0;
+  int sur_size = 0;
+  int city_size = 0;
+  BF_ErrorCode err;
+  BF_Block_Init(&block);
+
+  if(err = BF_GetBlockCounter(fileDesc, &blocks) != BF_OK)
+    return HP_ERROR;
+
+  //for all blocks
+  for(int i=1; i<blocks; i++){
+    if(BF_GetBlock(fileDesc, i, block) != BF_OK)
+      return HP_ERROR;
+    offset = 0;
+    //get number of recs in the block
+    data = BF_Block_GetData(block);
+    memmove(&recs, data, sizeof(int));
+    offset = sizeof(int);
+    //get sizes of Record
+    memmove(&id_size, data+offset, sizeof(int));
+    offset += sizeof(int);
+    memmove(&name_size, data+offset, sizeof(int));
+    offset += sizeof(int);
+    memmove(&sur_size, data+offset, sizeof(int));
+    offset += sizeof(int);
+    memmove(&city_size, data+offset, sizeof(int));
+    offset += sizeof(int);
+
+    //for each block print the entries
+    for(int j=0; j< recs; j++){
+      //print id
+      printf("%d\n", *((int *)data+offset));
+      offset += id_size;
+      //print name
+      printf("%s\n", data+offset);
+      offset += name_size;
+      //print surname
+      printf("%s\n", data+offset);
+      offset += sur_size;
+      //print city
+      printf("%s\n", data+offset);
+      offset += city_size;
+    }
+    BF_UnpinBlock(block);
+    printf("\n\n");
+  }
+  BF_Block_Destroy(&block);
 
   return SR_OK;
 }
