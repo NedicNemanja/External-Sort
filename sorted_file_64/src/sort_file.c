@@ -210,6 +210,19 @@ SR_ErrorCode SR_SortedFile(
       //get the run to the buffers
       for(int i=0; i<bufferSize; i++){
         BF_GetBlock(tempDesc,iteratedBlocks,pinnedBlocks[i]);
+        char * data = NULL;
+        //int offset = BLOCKBASEOFFSET + 0*SIZEOFRECORD;
+
+        //printf("BLOCK: %d RECORD: %d OFFSET: %d\n", requestedBlock, requestedRecord, offset);
+        printf("EEP\n");
+        data = BF_Block_GetData(pinnedBlocks[i]);
+        if (data == NULL)
+        {
+          printf("OPA MALAKA ELOUSES\n");
+        }
+        int id;
+        memmove(&id, data /*+ offset*/, sizeof(int));
+        printf("TO ID %d\n", id);
         iteratedBlocks++;
       }
       //sort the run
