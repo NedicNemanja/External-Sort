@@ -277,9 +277,12 @@ int isFull(BF_Block *block){
 	else return 0;
 }
 
-int isFinished(int offset){
-	int avail_space = BF_BLOCK_SIZE -offset -SIZEOFRECORD;
-	if(avail_space < 0) return 1;
+int isFinished(BF_Block *block, int offset){
+	char * data = BF_Block_GetData(block);
+	int recs =0;
+	memmove(&recs, data, sizeof(int));
+	int past = offset - (recs*SIZEOFRECORD)- BLOCKBASEOFFSET;
+	if(past >= 0) return 1;
 	else return 0;
 }
 
@@ -357,8 +360,9 @@ void SortAndStoreRuns(Run** runArray, int size, int fieldNo, int out_fileDesc){
 		while(min <size && !runArray[min]->size)
 			min++;
 		if(min >= size) break;
-		printf("Found min%d\n", min);
+		printf("Found min %d, run->size %d, offset: %d\n", min, runArray[min]->size, offsets[min]);
 		Record *minRec = (Record *) (BF_Block_GetData(runArray[min]->pinnedBlock) + offsets[min]);
+		//printf("minRec %d %s %s %s\n", minRec->id, minRec->name, minRec->surname, minRec->city);
 		for(int i=min; i<size; i++){
 			if(!runArray[i]->size){
 				continue;
@@ -366,14 +370,18 @@ void SortAndStoreRuns(Run** runArray, int size, int fieldNo, int out_fileDesc){
 			else{
 				//printf("offsets[i]: %d\n", offsets[i]);
 				//check here if block is at end
-				if(isFinished(offsets[i])){
-					//printf("Is finished!\n");
+				if(isFinished(runArray[i]->pinnedBlock, offsets[i])){
+					printf("Is finished!\n");
+					fflush(stdout);
 					Run_NextBlock(runArray[i]);
 					offsets[i] = BLOCKBASEOFFSET;
 				}
 				if(runArray[i]->size){
 					Record *tRec = (Record *) (BF_Block_GetData(runArray[i]->pinnedBlock) + offsets[i]);
-					//printf("offsets[min]: %d, offsets[i]: %d, offsets[size]: %d\n", offsets[min], offsets[i], offsets[size]);
+					printf("tRec %d %s %s %s\n", tRec->id, tRec->name, tRec->surname, tRec->city);
+					fflush(stdout);
+					printf("offsets[min]: %d, offsets[i]: %d, offsets[size]: %d\n", offsets[min], offsets[i], offsets[size]);
+					fflush(stdout);
 					if(recordLessThan(tRec, minRec, fieldNo)){
 						min = i;
 						minRec = tRec;
