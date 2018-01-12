@@ -187,7 +187,7 @@ SR_ErrorCode SR_SortedFile(
   //SR_CreateFile("tempSortFile");
   int tempDesc;
   SR_OpenFile("tempSortFile", &tempDesc);
-  CopyFile(tempDesc,fileDesc);
+  CopyFile(fileDesc, tempDesc);
   //TO COPY GINETE LOW LEVEL BYTE PER BYTE XWRIS SR CREATE FILE KLP NA DEN LITOURGISEI TO KANOUME HIGH LEVEL
   //tempDesc = copyFile(input_filename, "tempSortFile");
   //EPISIS O TEMPDESC EPISTREFETE ANOIXTOS, NA KLEISTEI KAPOU PIO KATW
