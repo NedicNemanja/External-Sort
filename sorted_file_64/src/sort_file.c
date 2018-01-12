@@ -194,7 +194,7 @@ SR_ErrorCode SR_SortedFile(
 
   /*initialize pinnedBlocks:  This is where we keep the BF_Block* of the blocks
                               that are currently pinned.*/
-  BF_Block* pinnedBlocks[bufferSize];
+  BF_Block** pinnedBlocks = malloc(bufferSize*sizeof(BF_Block*));
   for(int i=0; i<bufferSize; i++)
       BF_Block_Init(&pinnedBlocks[i]);
 
@@ -304,7 +304,7 @@ SR_ErrorCode SR_SortedFile(
   }
 
   //close all files
-
+  free(pinnedBlocks);
   return SR_OK;
 }
 

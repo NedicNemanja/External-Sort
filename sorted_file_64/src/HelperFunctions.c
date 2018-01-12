@@ -62,7 +62,7 @@ Record getRecordFromBlock(BF_Block** blockArray, int size, int requestedBlock, i
 	int offset = BLOCKBASEOFFSET + requestedRecord*SIZEOFRECORD;
 
 	data = BF_Block_GetData(blockArray[requestedBlock]);
-	memmove(&(tmpRecord.id),data + offset, sizeof(int));
+	memmove(&(tmpRecord.id), data + offset, sizeof(int));
 	offset+=sizeof(int);
 	memmove(&(tmpRecord.name),data + offset, SIZEOFNAME);
 	offset+=SIZEOFNAME;
@@ -138,7 +138,8 @@ void recordSwap(BF_Block** blockArray, int size, Index i, Index j){
 	setRecord(blockArray, i.blockIndex, i.recordIndex, tmpRecj);
 	setRecord(blockArray, j.blockIndex, j.recordIndex, tmpReci);
 }
-//function of a typical Quicksort function that gathers all the smaller items than pivot to its lefta and
+
+//function of a typical Quicksort function that gathers all the smaller items than pivot to its left and
 //all the bigger to its right. Pivot is selected to be every time the last element of the array
 Index partition(BF_Block** blockArray, int size, int fieldNo, Index low, Index high){
 	int b, r;
@@ -199,7 +200,7 @@ void quickSort(BF_Block** blockArray, int size, int fieldNo, int lastRun, int la
 		high.recordIndex = (BF_BLOCK_SIZE - BLOCKBASEOFFSET) / SIZEOFRECORD - 1;
 	}
 
-	QuickSortRun(blockArray,size,fieldNo, low, high);
+	QuickSortRun(blockArray,size,fieldNo, low, high); //provlima
 }
 
 int isFull(BF_Block *block){
