@@ -306,7 +306,7 @@ void SortAndStoreRuns(Run** runArray, int size, int fieldNo, int out_fileDesc){
 					offsets[i] = BLOCKBASEOFFSET;
 				}
 				if(runArray[min]->size){
-					Record *tRec = (Record *) BF_Block_GetData(runArray[i]->pinnedBlock) + offsets[i];
+					Record *tRec = (Record *) (BF_Block_GetData(runArray[i]->pinnedBlock) + offsets[i]);
 					if(recordLessThan(tRec, minRec, fieldNo)){
 						min = i;
 						minRec = tRec;
@@ -314,9 +314,9 @@ void SortAndStoreRuns(Run** runArray, int size, int fieldNo, int out_fileDesc){
 				}
 			}
 		}
-
+		target = BF_Block_GetData(outBlock);
 		//move the record to the sorted buffer and increment offsets
-		memmove(target+offsets[size-1], minRec, SIZEOFRECORD);
+		memmove(target+offsets[size], minRec, SIZEOFRECORD);
 		offsets[min] += SIZEOFRECORD;
 		offsets[size] += SIZEOFRECORD;
 		//increment the number of recs in buffer
