@@ -241,13 +241,21 @@ void SortAndStoreRuns(Run** runArray, int size, int fieldNo, int out_fileDesc){
 		}
 
 		min = 0;
+		//find a min and if you don't find, break;
+		while(runArray[min]->pinnedBlock == NULL && min <size)
+			min++;
+		if(min >= size) break;
+
 		Record *minRec = (Record *) BF_Block_GetData(runArray[min]->pinnedBlock) + offsets[min];
-		for(int i=1; i<size-1; i++){
+		for(int i=min; i<size; i++){
 			if(runArray[i]->pinnedBlock == NULL){
 				continue;
 			}
 			else{
 				//check here if block is at end
+				if(isFinished(offsets[i])){
+
+				}
 				Record *tRec = (Record *) BF_Block_GetData(runArray[i]->pinnedBlock) + offsets[i];
 				if(recordLessThan(tRec, minRec, fieldNo)){
 					min = i;
@@ -280,7 +288,10 @@ void SortAndStoreRuns(Run** runArray, int size, int fieldNo, int out_fileDesc){
 				//theheap.size--;
 		//}
 
+	//cleanup
 	//destroyheap(&theheap);
+	BF_Block_SetDirty(outBlock);
+	BF_UnpinBlock(outBlock);
 	BF_Block_Destroy(&outBlock);
 	free(offsets);
 }
