@@ -187,10 +187,11 @@ SR_ErrorCode SR_SortedFile(
 ***********sort the file into runs and save them in a temporary file***********
 ******************************************************************************/
   //creating a copy of the input_file so it remains unchanged
-  //SR_CreateFile("tempSortFile");
+  SR_CreateFile("tempSortFile");
   int tempDesc;
   SR_OpenFile("tempSortFile", &tempDesc);
   CopyFile(fileDesc, tempDesc);
+  SR_CloseFile(input_filename);
 printf("Printing tempSortFile:---------------------------------------------\n");
 SR_PrintAllEntries(tempDesc);
     //return SR_ERROR;
@@ -314,7 +315,7 @@ fflush(stdout);
 
     /*Flush and prepare for next iteration*/
     SR_CloseFile(in_file);
-    //in_file destroy
+    SR_Des
     in_file = out_file;
     if(iteration != iterations){
       //create a new out_file named "outFile*here_goes_iteration_number*"
