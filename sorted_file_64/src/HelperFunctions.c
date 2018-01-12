@@ -214,7 +214,7 @@ int isFull(BF_Block *block){
 	int recs =0;
 	char * data = BF_Block_GetData(block);
 	memmove(&recs, data, sizeof(int));
-	return BF_BLOCK_SIZE - BLOCKBASEOFFSET+(recs+1)*SIZEOFRECORD > 0 ? 0 : 1;
+	return BF_BLOCK_SIZE - BLOCKBASEOFFSET+(recs+1)*SIZEOFRECORD > 0 ? 1 : 0;
 }
 
 int isFinished(int offset){
@@ -317,6 +317,7 @@ void SortAndStoreRuns(Run** runArray, int size, int fieldNo, int out_fileDesc){
 
 		target = BF_Block_GetData(outBlock);
 		//move the record to the sorted buffer and increment offsets
+printf("")
 		memmove(target+offsets[size], minRec, SIZEOFRECORD);
 		offsets[min] += SIZEOFRECORD;
 		offsets[size] += SIZEOFRECORD;
