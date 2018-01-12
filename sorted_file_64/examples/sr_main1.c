@@ -75,7 +75,7 @@ int main() {
     memcpy(record.surname, surnames[r], strlen(surnames[r]) + 1);
     r = rand() % 10;
     memcpy(record.city, cities[r], strlen(cities[r]) + 1);
-
+    //printf("%d\n%s\n%s\n%s\n", record.id, record.name, record.surname, record.city);
     CALL_OR_DIE(SR_InsertEntry(fd, record));
   }
 

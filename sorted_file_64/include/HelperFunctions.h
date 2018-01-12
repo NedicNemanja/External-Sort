@@ -39,7 +39,7 @@ void StoreRun(int fileDesc,BF_Block** pinnedBlocks,int run_size);
 void InsertBlock(int fileDesc, BF_Block* block);
 
 //copy the file with name inputFileName to a new file it creates, the outputFileName, returns the fd of the output file
-int copyFile(const char *inputFileName, char * outputFileName);
+int CopyFile(int fileDesc1, int fileDesc2);
 
 void quickSort(BF_Block** blockArray, int size, int fieldNo, int lastRun, int lastRunSize);
 

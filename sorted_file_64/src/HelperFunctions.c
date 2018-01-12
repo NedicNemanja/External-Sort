@@ -34,14 +34,16 @@ Index indexIncr(Index index, int size){
 	int lastRecordIndex = (BF_BLOCK_SIZE - BLOCKBASEOFFSET) / SIZEOFRECORD - 1;
 	//if the index to increase is the last record of a block
 	if (index.recordIndex == lastRecordIndex){	//and the block is the last block
-		if (index.blockIndex == size - 1){//then we cannot increase it without getting out of borders
-			printf("Error in Quicksort's index increase.\n");
+		/*if (index.blockIndex == size - 1){//then we cannot increase it without getting out of borders
+			//printf("Error in Quicksort's index increase %d %d.\n", index.blockIndex, index.recordIndex);
 			exit(-1);
 		}
     else{//else set the block to the next and the record to the first of the next
 			index.blockIndex++;
 			index.recordIndex = 0;
-		}
+		}*/
+		index.blockIndex++;
+		index.recordIndex = 0;
 	}
   else{//else if its just a random record set it to the next
 		index.recordIndex++;
@@ -61,8 +63,10 @@ Record getRecordFromBlock(BF_Block** blockArray, int size, int requestedBlock, i
 	char * data = NULL;
 	int offset = BLOCKBASEOFFSET + requestedRecord*SIZEOFRECORD;
 
+	//printf("BLOCK: %d RECORD: %d OFFSET: %d\n", requestedBlock, requestedRecord, offset);
+
 	data = BF_Block_GetData(blockArray[requestedBlock]);
-	memmove(&(tmpRecord.id),data + offset, sizeof(int));
+	memmove(&(tmpRecord.id), data + offset, sizeof(int));
 	offset+=sizeof(int);
 	memmove(&(tmpRecord.name),data + offset, SIZEOFNAME);
 	offset+=SIZEOFNAME;
@@ -138,10 +142,12 @@ void recordSwap(BF_Block** blockArray, int size, Index i, Index j){
 	setRecord(blockArray, i.blockIndex, i.recordIndex, tmpRecj);
 	setRecord(blockArray, j.blockIndex, j.recordIndex, tmpReci);
 }
-//function of a typical Quicksort function that gathers all the smaller items than pivot to its lefta and
+
+//function of a typical Quicksort function that gathers all the smaller items than pivot to its left and
 //all the bigger to its right. Pivot is selected to be every time the last element of the array
 Index partition(BF_Block** blockArray, int size, int fieldNo, Index low, Index high){
 	int b, r;
+	//printf("MPIKA\n");
 
 	Record pivot = getRecordFromBlock(blockArray, size, high.blockIndex, high.recordIndex);
 	Index i = indexDecr(low);
@@ -151,6 +157,7 @@ Index partition(BF_Block** blockArray, int size, int fieldNo, Index low, Index h
       Record tmpRec = getRecordFromBlock(blockArray, size, b, r);
 				//if the current record is smaller or equal to pivot
 			if (recordLessEqualThan(tmpRec, pivot, fieldNo)){
+				//printf("1\n");
 				i = indexIncr(i, size);
 				Index j;
 				j.blockIndex = b;
@@ -160,6 +167,7 @@ Index partition(BF_Block** blockArray, int size, int fieldNo, Index low, Index h
 			}
 		}
 	}
+	//printf("2\n");
 	i = indexIncr(i, size);
 	recordSwap(blockArray, size, i, high);
 	return i;
@@ -172,6 +180,7 @@ void QuickSortRun(BF_Block** blockArray, int size, int fieldNo, Index low, Index
 		Index part = partition(blockArray, size, fieldNo, low, high);
 
 		Index decreasedPart = indexDecr(part);
+		//printf("3\n");
 		Index increasedPart = indexIncr(part, size);
 		//now sort in the same way the elements in the left of part and to the right of part
 		QuickSortRun(blockArray, size, fieldNo, low, decreasedPart);
@@ -182,7 +191,6 @@ void QuickSortRun(BF_Block** blockArray, int size, int fieldNo, Index low, Index
 void quickSort(BF_Block** blockArray, int size, int fieldNo, int lastRun, int lastRunSize){
 	Index low, high;
 	char *data = NULL;
-	int offset = 4 * sizeof(int);
 
 	low.blockIndex = 0;
 	low.recordIndex = 0;
@@ -191,15 +199,15 @@ void quickSort(BF_Block** blockArray, int size, int fieldNo, int lastRun, int la
 	{
 		high.blockIndex = lastRunSize - 1;
 
-		data = BF_Block_GetData(blockArray[lastRunSize]);
-		memmove(&(high.recordIndex), data + offset, sizeof(int));
+		data = BF_Block_GetData(blockArray[lastRunSize-1]);
+		memmove(&(high.recordIndex), data, sizeof(int));
 		high.recordIndex--;
 	}else{
 		high.blockIndex = size - 1;
 		high.recordIndex = (BF_BLOCK_SIZE - BLOCKBASEOFFSET) / SIZEOFRECORD - 1;
 	}
 
-	QuickSortRun(blockArray,size,fieldNo, low, high);
+	QuickSortRun(blockArray,size,fieldNo, low, high); //provlima
 }
 
 int isFull(BF_Block *block){
@@ -311,18 +319,82 @@ void InsertBlock(int fileDesc, BF_Block* block){
 
 }
 
-int copyFile(const char *inputFileName, char * outputFileName){
-	int input = open(inputFileName, O_RDONLY, 0);
-	int output = open(outputFileName, O_WRONLY | O_CREAT, 0644);
+int CopyFile(int fileDesc1, int fileDesc2){
+	int blocks = 0, offset = 0, recs = 0;
+	char *data1 = NULL, *data2 = NULL;
+	char * message = "Sort";
+	BF_Block *block1 = NULL, *block2 = NULL;
+	int id_size = 0;
+	int name_size = 0;
+	int sur_size = 0;
+	int city_size = 0;
+	BF_ErrorCode err;
+	BF_Block_Init(&block1);
+	BF_Block_Init(&block2);
 
-	struct stat stat_source;
-    fstat(input, &stat_source);
+	BF_AllocateBlock(fileDesc2, block2);
+  //get pointer to block data
+  data2 = BF_Block_GetData(block2);
+  //write "sort" to know that it's a sort file
+  memmove(data2, message, sizeof(message));
+  //cleanup
+  BF_Block_SetDirty(block2);
+  BF_UnpinBlock(block2);
 
-    sendfile(output, input, 0, stat_source.st_size);
+	BF_GetBlockCounter(fileDesc1, &blocks);
 
-    close(input);
-    //close(output);
-    return output;
+	//for all blocks
+	for(int i=1; i<blocks; i++){
+		if(BF_GetBlock(fileDesc1, i, block1) != BF_OK)
+			fprintf(stderr, "Something went wrong\n");
+		if(BF_AllocateBlock(fileDesc2, block2) != BF_OK)
+			fprintf(stderr, "Something went wrong2\n");
+		offset = 0;
+		//get number of recs in the block
+		data1 = BF_Block_GetData(block1);
+		data2 = BF_Block_GetData(block2);
+		memmove(&recs, data1, sizeof(int));
+		memmove(data2, &recs, sizeof(int));
+		offset = sizeof(int);
+		//get sizes of Record
+		memmove(&id_size, data1+offset, sizeof(int));
+		memmove(data2+offset, data1+offset, sizeof(int));
+		offset += sizeof(int);
+		memmove(&name_size, data1+offset, sizeof(int));
+		memmove(data2+offset, data1+offset, sizeof(int));
+		offset += sizeof(int);
+		memmove(&sur_size, data1+offset, sizeof(int));
+		memmove(data2+offset, data1+offset, sizeof(int));
+		offset += sizeof(int);
+		memmove(&city_size, data1+offset, sizeof(int));
+		memmove(data2+offset, data1+offset, sizeof(int));
+		offset += sizeof(int);
+
+		//for each block print the entries
+		for(int j=0; j< recs; j++){
+			//print id
+			memmove(data2+offset, data1+offset, id_size);
+			offset += id_size;
+			//print name
+			memmove(data2+offset, data1+offset, name_size);
+			offset += name_size;
+			//print surname
+			memmove(data2+offset, data1+offset, sur_size);
+			offset += sur_size;
+			//print city
+			memmove(data2+offset, data1+offset, city_size);
+			offset += city_size;
+		}
+		BF_Block_SetDirty(block2);
+		BF_UnpinBlock(block2);
+		BF_UnpinBlock(block1);
+	}
+	BF_Block_Destroy(&block2);
+	BF_Block_Destroy(&block1);
+	printf("File1 blocks: %d\n", blocks);
+	BF_GetBlockCounter(fileDesc2, &blocks);
+	printf("File2 blocks: %d\n", blocks);
+	return 1;
 }
 
 

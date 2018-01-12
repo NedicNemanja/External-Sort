@@ -1,5 +1,6 @@
-#include <string.h>
 #include <math.h>
+#include <stdlib.h>
+#include <string.h>
 #include "sort_file.h"
 #include "bf.h"
 #include "HelperFunctions.h"
@@ -170,6 +171,8 @@ SR_ErrorCode SR_InsertEntry(int fileDesc,	Record record) {
   return SR_OK;
 }
 
+SR_ErrorCode SR_PrintAllEntries(int fileDesc);
+
 SR_ErrorCode SR_SortedFile(
   const char* input_filename,
   const char* output_filename,
@@ -186,40 +189,52 @@ SR_ErrorCode SR_SortedFile(
   //creating a copy of the input_file so it remains unchanged
   //SR_CreateFile("tempSortFile");
   int tempDesc;
-  //SR_OpenFile("tempSortFile",&tempDesc);
-  //CopyFile(tempDesc,fileDesc);
-  //TO COPY GINETE LOW LEVEL BYTE PER BYTE XWRIS SR CREATE FILE KLP NA DEN LITOURGISEI TO KANOUME HIGH LEVEL
-  tempDesc = copyFile(input_filename, "tempSortFile");
+  SR_OpenFile("tempSortFile", &tempDesc);
+  CopyFile(fileDesc, tempDesc);
+  printf("Printing new\n");
+  //SR_PrintAllEntries(tempDesc);
+    //return SR_ERROR;
   //EPISIS O TEMPDESC EPISTREFETE ANOIXTOS, NA KLEISTEI KAPOU PIO KATW
 
   /*initialize pinnedBlocks:  This is where we keep the BF_Block* of the blocks
                               that are currently pinned.*/
-  BF_Block* pinnedBlocks[bufferSize];
+  BF_Block** pinnedBlocks = malloc(bufferSize*sizeof(BF_Block*));
   for(int i=0; i<bufferSize; i++)
       BF_Block_Init(&pinnedBlocks[i]);
 
   //initialize some counters
-  int BlockCount, iteratedBlocks = 0;
-  BF_GetBlockCounter(fileDesc,&BlockCount);
+  int BlockCount, iteratedBlocks = 0, bb=0;
+  BF_GetBlockCounter(fileDesc, &BlockCount);
   iteratedBlocks++; //skip the metadata block
-  int lastRunSize = BlockCount%bufferSize;
+  int lastRunSize = (BlockCount-1)%bufferSize;
 
   //get,sort and store the runs one by one
-  while(iteratedBlocks < BlockCount-lastRunSize){
+  while(iteratedBlocks <= BlockCount-lastRunSize -bufferSize){
+      //printf("ItB %d Bc %d lrs %d buf %d\n" ,iteratedBlocks, BlockCount, lastRunSize, bufferSize);
       //get the run to the buffers
+      for(int i=0; i<bufferSize; i++)
+          BF_Block_Init(&pinnedBlocks[i]);
       for(int i=0; i<bufferSize; i++){
-        BF_GetBlock(tempDesc,iteratedBlocks,pinnedBlocks[i]);
+        BF_GetBlockCounter(tempDesc, &bb);
+        BF_GetBlock(tempDesc, iteratedBlocks, pinnedBlocks[i]);
         iteratedBlocks++;
       }
+      printf("quick\n");
+      fflush(stdout);
       //sort the run
       quickSort(pinnedBlocks, bufferSize, fieldNo, 0, lastRunSize);
       //store the sorted run back to the temp_file
       for(int i=0; i<bufferSize; i++){
         BF_Block_SetDirty(pinnedBlocks[i]);
         BF_UnpinBlock(pinnedBlocks[i]);
-        pinnedBlocks[i] = NULL;
+        BF_Block_Destroy(&pinnedBlocks[i]);
+        //pinnedBlocks[i] = NULL;
       }
   }
+  printf("EDOOO\n");
+  fflush(stdout);
+  for(int i=0; i<lastRunSize; i++)
+      BF_Block_Init(&pinnedBlocks[i]);
   //***do the last run as well***
   //MPOREI TO LAST RUN NA DIERITE AKRIVWS EDW KAI NA MIN IPARXEI, NA VALOUME IF AN IPARXEI NA KANEI TA APO KATW?
   //get the last run to the buffers
@@ -229,34 +244,39 @@ SR_ErrorCode SR_SortedFile(
   }
   //sort the last run
   //EDW TO HIGH EINAI ALLO E
-  quickSort(pinnedBlocks, bufferSize, fieldNo, 1, lastRunSize);
+  printf("LastRunSize %d\n", lastRunSize);
+  if(lastRunSize)
+    quickSort(pinnedBlocks, bufferSize, fieldNo, 1, lastRunSize);
   //store it
   for(int i=0; i<lastRunSize; i++){
     BF_Block_SetDirty(pinnedBlocks[i]);
     BF_UnpinBlock(pinnedBlocks[i]);
-    pinnedBlocks[i] = NULL;
+    BF_Block_Destroy(&pinnedBlocks[i]);
+    //pinnedBlocks[i] = NULL;
   }
   //destroy pinnedBlocks to free the buffers
-  for(int i=0; i<bufferSize; i++){
+  /*for(int i=0; i<bufferSize; i++){
     BF_Block_Destroy(&pinnedBlocks[i]);
-  }
+  }*/
+  //SR_PrintAllEntries(tempDesc);
 /******************************************************************************
 **************merge the runs and store them in the output_filename*************
 ******************************************************************************/
   int run_size = bufferSize;
   BlockCount--; //minus the metadata block
-  int in_file=tempDesc; //this is where we get runs from
+  int in_file = tempDesc; //this is where we get runs from
   int out_file;         //this is where we store merged runs to
   SR_CreateFile("outFile1");
   SR_OpenFile("outFile1",&out_file);
   //arithmetics to determine how many iterations we'll need to sort the file
-  int m = (int)ceil( (double)BlockCount/(double)bufferSize );
-  int iterations = (int)(log(bufferSize-1)/log(m));
+  int m = ceil( (double)BlockCount/(double)bufferSize );
+  int iterations = log(bufferSize-1)/log(m);
 
   /*initialize pinnedRuns:  This is where we keep the Runs
                             that are currently pinned.*/
-  Run* pinnedRuns[bufferSize-1];
-
+  Run** pinnedRuns = malloc((bufferSize-1)*sizeof(Run *));
+  printf("E1\n");
+  fflush(stdout);
   /*Sort the whole file into bigger runs.
    Repeat until the whole file is a sorted run,
    but hold on for the last iteration,
@@ -292,9 +312,9 @@ SR_ErrorCode SR_SortedFile(
       char* new_file_name = "outFile";
       char file_serial_num[10];
       snprintf(file_serial_num, 10, "%d", iteration);//iteration as a string
-      strcat(new_file_name,file_serial_num);  //example "outFile16"
+      strcat(new_file_name, file_serial_num);  //example "outFile16"
       SR_CreateFile(new_file_name);
-      SR_OpenFile(new_file_name,&out_file);
+      SR_OpenFile(new_file_name, &out_file);
     }
     /*The last iteration must be written to the out_file*/
     else
@@ -304,7 +324,9 @@ SR_ErrorCode SR_SortedFile(
   }
 
   //close all files
-
+  SR_PrintAllEntries(tempDesc);
+  free(pinnedRuns);
+  free(pinnedBlocks);
   return SR_OK;
 }
 
@@ -346,7 +368,9 @@ SR_ErrorCode SR_PrintAllEntries(int fileDesc) {
     //for each block print the entries
     for(int j=0; j< recs; j++){
       //print id
-      printf("%d\n", *((int *)data+offset));
+      int id;
+      memmove(&id, data+offset, id_size);
+      printf("%d\n", id);
       offset += id_size;
       //print name
       printf("%s\n", data+offset);
