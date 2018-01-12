@@ -189,7 +189,7 @@ SR_ErrorCode SR_SortedFile(
   //SR_OpenFile("tempSortFile",&tempDesc);
   //CopyFile(tempDesc,fileDesc);
   //TO COPY GINETE LOW LEVEL BYTE PER BYTE XWRIS SR CREATE FILE KLP NA DEN LITOURGISEI TO KANOUME HIGH LEVEL
-  tempDesc = copyFile(input_filename, "tempSortFile");
+  tempDesc = fileDesc;//copyFile(input_filename, "tempSortFile");
   //EPISIS O TEMPDESC EPISTREFETE ANOIXTOS, NA KLEISTEI KAPOU PIO KATW
 
   /*initialize pinnedBlocks:  This is where we keep the BF_Block* of the blocks
@@ -247,8 +247,8 @@ SR_ErrorCode SR_SortedFile(
   BlockCount--; //minus the metadata block
   int in_file=tempDesc; //this is where we get runs from
   int out_file;         //this is where we store merged runs to
-  SR_CreateFile("outFile1");
-  SR_OpenFile("outFile1",&out_file);
+  SR_CreateFile("outFile1.db");
+  SR_OpenFile("outFile1.db",&out_file);
   //arithmetics to determine how many iterations we'll need to sort the file
   int m = (int)ceil( (double)BlockCount/(double)bufferSize );
   int iterations = (int)(log(bufferSize-1)/log(m));
@@ -291,8 +291,9 @@ SR_ErrorCode SR_SortedFile(
       //create a new out_file named "outFile*here_goes_iteration_number*"
       char* new_file_name = "outFile";
       char file_serial_num[10];
-      snprintf(file_serial_num, 10, "%d", iteration);//iteration as a string
+      snprintf(file_serial_num, 10, "%d", iteration+1);//iteration as a string
       strcat(new_file_name,file_serial_num);  //example "outFile16"
+      strcat(new_file_name,".db");
       SR_CreateFile(new_file_name);
       SR_OpenFile(new_file_name,&out_file);
     }
