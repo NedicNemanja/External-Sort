@@ -280,7 +280,7 @@ SR_PrintAllEntries(tempDesc);
   /*initialize pinnedRuns:  This is where we keep the Runs
                             that are currently pinned.*/
   Run** pinnedRuns = malloc((bufferSize-1)*sizeof(Run *));
-printf("iterations:%d,BlockCount:%d,run_size:%d\n", iterations,BlockCount,run_size);
+printf("iterations:%d,BlockCount:%d,run_size:%d,lastRunSize:%d\n", iterations,BlockCount,run_size,lastRunSize);
 fflush(stdout);
   /*Sort the whole file into bigger runs.
    Repeat until the whole file is a sorted run,

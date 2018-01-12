@@ -451,13 +451,15 @@ int PinGroup(Run** pinnedRuns,int in_file,int* current_block_id,int run_size,
 		//mark this run as merged
 		*num_of_unmerged_blocks -= run_size;
 		//if only the last run is left
-		if(*num_of_unmerged_blocks == lastRunSize){
+		if(*num_of_unmerged_blocks == lastRunSize && lastRunSize != 0){
 			*current_block_id += lastRunSize;
 			pinnedRuns[buffer_index] = Run_init(in_file,*current_block_id,lastRunSize);
 			group_size++;
 			*num_of_unmerged_blocks -= lastRunSize;
 			break;
 		}
+		else if(*num_of_unmerged_blocks == 0)
+			break;
 		else
 			*current_block_id += run_size;
 	}
