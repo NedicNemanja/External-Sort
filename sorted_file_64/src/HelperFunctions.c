@@ -224,8 +224,30 @@ int isFinished(int offset){
 //initialize offsets array with specific offset
 void InitOffsets(int *offsets, int size, int offset){
 	offsets = malloc(size*sizeof(int));
-	for(int i=size-1; i>=0; i--)
-		offsets[i] = 0;
+	for(int i=0; i<size; i++)
+		offsets[i] = offset;
+}
+
+void initBlock(BF_Block *block){
+	char *data = NULL;
+	data = BF_Block_GetData(block);
+	int offset = 0;
+  //move the counter (0) to the start of the block
+  memmove(data, &offset, sizeof(int));
+  offset = sizeof(int);
+  //move sizes of Record to the start of the block
+  size = SIZEOFID;
+  memmove(data+offset, &size, sizeof(int));
+  offset += sizeof(int);
+  size = SIZEOFNAME;
+  memmove(data+offset, &size, sizeof(int));
+  offset += sizeof(int);
+  size = SIZEOFSURNAME;
+  memmove(data+offset, &size, sizeof(int));
+  offset += sizeof(int);
+  size = SIZEOFCITY;
+  memmove(data+offset, &size, sizeof(int));
+  offset += sizeof(int);
 }
 
 void initFirstBlock(BF_Block *block){
@@ -243,13 +265,14 @@ void SortAndStoreRuns(Run** runArray, int size, int fieldNo, int out_fileDesc){
 	int *offsets = NULL, end=0, min, recs;
 	char *target = NULL;
 	BF_Block *outBlock = NULL;
-	InitOffsets(offsets, size, BLOCKBASEOFFSET);
+	InitOffsets(offsets, size+1, BLOCKBASEOFFSET);
 	BF_Block_Init(&outBlock);
 	//initialize the first block
 	BF_AllocateBlock(out_fileDesc, outBlock);
 	initFirstBlock(outBlock);
 
 	BF_AllocateBlock(out_fileDesc, outBlock);
+	initBlock(outBlock);
 	//heap theheap;
 	//makeheap(blockArray, size-1, fieldNo, &theheap);
 	//while(theheap.size >0){
@@ -261,6 +284,8 @@ void SortAndStoreRuns(Run** runArray, int size, int fieldNo, int out_fileDesc){
 			BF_Block_SetDirty(outBlock);
 			BF_UnpinBlock(outBlock);
 			BF_AllocateBlock(out_fileDesc, outBlock);
+			initBlock(outBlock);
+			offsets[size] = BLOCKBASEOFFSET;
 		}
 
 		min = 0;
@@ -276,8 +301,10 @@ void SortAndStoreRuns(Run** runArray, int size, int fieldNo, int out_fileDesc){
 			}
 			else{
 				//check here if block is at end
-				if(isFinished(offsets[i]))
+				if(isFinished(offsets[i])){
 					Run_NextBlock(runArray[i]);
+					offsets[i] = BLOCKBASEOFFSET;
+				}
 				if(runArray[min]->size){
 					Record *tRec = (Record *) BF_Block_GetData(runArray[i]->pinnedBlock) + offsets[i];
 					if(recordLessThan(tRec, minRec, fieldNo)){
@@ -291,7 +318,7 @@ void SortAndStoreRuns(Run** runArray, int size, int fieldNo, int out_fileDesc){
 		//move the record to the sorted buffer and increment offsets
 		memmove(target+offsets[size-1], minRec, SIZEOFRECORD);
 		offsets[min] += SIZEOFRECORD;
-		offsets[size-1] += SIZEOFRECORD;
+		offsets[size] += SIZEOFRECORD;
 		//increment the number of recs in buffer
 		memmove(&recs, target, sizeof(int));
 		recs++;
