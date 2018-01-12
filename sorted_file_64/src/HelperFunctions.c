@@ -321,7 +321,6 @@ void InsertBlock(int fileDesc, BF_Block* block){
 
 int CopyFile(int fileDesc1, int fileDesc2){
 	int blocks = 0, offset = 0, recs = 0;
-	int rsize = sizeof(Record);
 	char *data1 = NULL, *data2 = NULL;
 	char * message = "Sort";
 	BF_Block *block1 = NULL, *block2 = NULL;
@@ -355,7 +354,7 @@ int CopyFile(int fileDesc1, int fileDesc2){
 		data1 = BF_Block_GetData(block1);
 		data2 = BF_Block_GetData(block2);
 		memmove(&recs, data1, sizeof(int));
-		memmove(data2, data1, sizeof(int));
+		memmove(data2, &recs, sizeof(int));
 		offset = sizeof(int);
 		//get sizes of Record
 		memmove(&id_size, data1+offset, sizeof(int));
@@ -392,6 +391,9 @@ int CopyFile(int fileDesc1, int fileDesc2){
 	}
 	BF_Block_Destroy(&block2);
 	BF_Block_Destroy(&block1);
+	printf("File1 blocks: %d\n", blocks);
+	BF_GetBlockCounter(fileDesc2, &blocks);
+	printf("File2 blocks: %d\n", blocks);
 	return 1;
 }
 
