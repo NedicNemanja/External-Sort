@@ -199,7 +199,7 @@ void quickSort(BF_Block** blockArray, int size, int fieldNo, int lastRun, int la
 	{
 		high.blockIndex = lastRunSize - 1;
 
-		data = BF_Block_GetData(blockArray[lastRunSize]);
+		data = BF_Block_GetData(blockArray[lastRunSize-1]);
 		memmove(&(high.recordIndex), data, sizeof(int));
 		high.recordIndex--;
 	}else{

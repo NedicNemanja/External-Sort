@@ -276,7 +276,6 @@ SR_ErrorCode SR_SortedFile(
     BF_Block_Destroy(&pinnedBlocks[i]);
   }*/
   SR_PrintAllEntries(tempDesc);
-  getchar();
 /******************************************************************************
 **************merge the runs and store them in the output_filename*************
 ******************************************************************************/
