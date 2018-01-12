@@ -191,10 +191,11 @@ SR_ErrorCode SR_SortedFile(
   int tempDesc;
   SR_OpenFile("tempSortFile", &tempDesc);
   CopyFile(fileDesc, tempDesc);
-  printf("Printing new\n");
-  //SR_PrintAllEntries(tempDesc);
+printf("Printing tempSortFile:---------------------------------------------\n");
+SR_PrintAllEntries(tempDesc);
     //return SR_ERROR;
   //EPISIS O TEMPDESC EPISTREFETE ANOIXTOS, NA KLEISTEI KAPOU PIO KATW
+
 
   /*initialize pinnedBlocks:  This is where we keep the BF_Block* of the blocks
                               that are currently pinned.*/
@@ -205,6 +206,7 @@ SR_ErrorCode SR_SortedFile(
   //initialize some counters
   int BlockCount, iteratedBlocks = 0, bb=0;
   BF_GetBlockCounter(fileDesc, &BlockCount);
+printf("---------------BLOCKCOUNT %d-------------\n", BlockCount);
   iteratedBlocks++; //skip the metadata block
   int lastRunSize = (BlockCount-1)%bufferSize;
 
@@ -258,7 +260,9 @@ SR_ErrorCode SR_SortedFile(
   /*for(int i=0; i<bufferSize; i++){
     BF_Block_Destroy(&pinnedBlocks[i]);
   }*/
-  //SR_PrintAllEntries(tempDesc);
+printf("QuickSorted tempSortFile:------------------------------------------\n");
+SR_PrintAllEntries(tempDesc);
+
 /******************************************************************************
 **************merge the runs and store them in the output_filename*************
 ******************************************************************************/
@@ -270,13 +274,12 @@ SR_ErrorCode SR_SortedFile(
   SR_OpenFile("outFile1",&out_file);
   //arithmetics to determine how many iterations we'll need to sort the file
   int m = ceil( (double)BlockCount/(double)bufferSize );
-  int iterations = log(bufferSize-1)/log(m);
+  unsigned int iterations = ceil( (double)log(m)/(double)log(bufferSize-1) );
 
   /*initialize pinnedRuns:  This is where we keep the Runs
                             that are currently pinned.*/
   Run** pinnedRuns = malloc((bufferSize-1)*sizeof(Run *));
-  printf("E1\n");
-  fflush(stdout);
+printf("iterations:%d,BlockCount:%d,run_size:%d", iterations,BlockCount,run_size);
   /*Sort the whole file into bigger runs.
    Repeat until the whole file is a sorted run,
    but hold on for the last iteration,
@@ -321,12 +324,12 @@ SR_ErrorCode SR_SortedFile(
       SR_OpenFile(output_filename,&out_file);
     //run have been merged in groups, the new run is a whole group
     run_size = group_size;
+printf("Outfile after iteration:%d---------------------------------------------", iteration);
+SR_PrintAllEntries(out_file);
   }
 
   //close all files
   SR_PrintAllEntries(tempDesc);
-  free(pinnedRuns);
-  free(pinnedBlocks);
   return SR_OK;
 }
 
