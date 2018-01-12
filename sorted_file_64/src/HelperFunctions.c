@@ -317,7 +317,6 @@ void SortAndStoreRuns(Run** runArray, int size, int fieldNo, int out_fileDesc){
 
 		target = BF_Block_GetData(outBlock);
 		//move the record to the sorted buffer and increment offsets
-printf("")
 		memmove(target+offsets[size], minRec, SIZEOFRECORD);
 		offsets[min] += SIZEOFRECORD;
 		offsets[size] += SIZEOFRECORD;
