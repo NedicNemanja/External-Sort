@@ -232,6 +232,7 @@ void initBlock(BF_Block *block){
 	char *data = NULL;
 	data = BF_Block_GetData(block);
 	int offset = 0;
+	int size = 0;
   //move the counter (0) to the start of the block
   memmove(data, &offset, sizeof(int));
   offset = sizeof(int);
@@ -293,7 +294,7 @@ void SortAndStoreRuns(Run** runArray, int size, int fieldNo, int out_fileDesc){
 		while(!runArray[min]->size && min <size)
 			min++;
 		if(min >= size) break;
-
+		printf("Here\n");
 		Record *minRec = (Record *) (BF_Block_GetData(runArray[min]->pinnedBlock) + offsets[min]);
 		for(int i=min; i<size; i++){
 			if(!runArray[i]->size){
