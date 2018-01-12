@@ -312,18 +312,80 @@ void InsertBlock(int fileDesc, BF_Block* block){
 
 }
 
-int copyFile(const char *inputFileName, char * outputFileName){
-	int input = open(inputFileName, O_RDONLY, 0);
-	int output = open(outputFileName, O_WRONLY | O_CREAT, 0644);
+int copyFile(int fileDesc1, int fileDesc2){
+	int blocks = 0, offset = 0, recs = 0;
+	int rsize = sizeof(Record);
+	char *data1 = NULL, *data2 = NULL;
+	char * message = "Sort";
+	BF_Block *block1 = NULL, *block2 = NULL;
+	int id_size = 0;
+	int name_size = 0;
+	int sur_size = 0;
+	int city_size = 0;
+	BF_ErrorCode err;
+	BF_Block_Init(&block1);
+	BF_Block_Init(&block2);
 
-	struct stat stat_source;
-    fstat(input, &stat_source);
+	BF_AllocateBlock(fileDesc2, block2);
+  //get pointer to block data
+  data2 = BF_Block_GetData(block2);
+  //write "sort" to know that it's a sort file
+  memmove(data2, message, sizeof(message));
+  //cleanup
+  BF_Block_SetDirty(block2);
+  BF_UnpinBlock(block2);
 
-    sendfile(output, input, 0, stat_source.st_size);
+	BF_GetBlockCounter(fileDesc1, &blocks);
 
-    close(input);
-    //close(output);
-    return output;
+	//for all blocks
+	for(int i=1; i<blocks; i++){
+		if(BF_GetBlock(fileDesc, i, block1) != BF_OK)
+			fprintf(stderr, "Something went wrong\n");
+		if(BF_AllocateBlock(fileDesc2, block2) != BF_OK)
+			fprintf(stderr, "Something went wrong2\n");
+		offset = 0;
+		//get number of recs in the block
+		data1 = BF_Block_GetData(block1);
+		data2 = BF_Block_GetData(block2);
+		memmove(&recs, data1, sizeof(int));
+		memmove(data2, data1, sizeof(int));
+		offset = sizeof(int);
+		//get sizes of Record
+		memmove(&id_size, data1+offset, sizeof(int));
+		memmove(data2+offset, data1+offset, sizeof(int));
+		offset += sizeof(int);
+		memmove(&name_size, data1+offset, sizeof(int));
+		memmove(data2+offset, data1+offset, sizeof(int));
+		offset += sizeof(int);
+		memmove(&sur_size, data1+offset, sizeof(int));
+		memmove(data2+offset, data1+offset, sizeof(int));
+		offset += sizeof(int);
+		memmove(&city_size, data1+offset, sizeof(int));
+		memmove(data2+offset, data1+offset, sizeof(int));
+		offset += sizeof(int);
+
+		//for each block print the entries
+		for(int j=0; j< recs; j++){
+			//print id
+			memmove(data2+offset, data1+offset, id_size);
+			offset += id_size;
+			//print name
+			memmove(data2+offset, data1+offset, name_size);
+			offset += name_size;
+			//print surname
+			memmove(data2+offset, data1+offset, sur_size);
+			offset += sur_size;
+			//print city
+			memmove(data2+offset, data1+offset, city_size);
+			offset += city_size;
+		}
+		BF_Block_SetDirty(block2);
+		BF_UnpinBlock(block2);
+		BF_UnpinBlock(block1);
+		printf("\n\n");
+	}
+	BF_Block_Destroy(&block2);
+	BF_Block_Destroy(&block1);
 }
 
 
