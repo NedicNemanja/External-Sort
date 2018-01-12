@@ -85,7 +85,7 @@ int SR_DestroyFile(char *fileName) {
   BF_GetBlock(fileDesc, 0, tmpBlock);//Getting the first block
   data = BF_Block_GetData(tmpBlock);//and its data
 
-  if (data == NULL || strcmp(data, "sort"))//to check if this new opened file is a sort file
+  if (data == NULL || strcmp(data, "Sort"))//to check if this new opened file is a sort file
   {
     BF_UnpinBlock(tmpBlock);
     BF_Block_Destroy(&tmpBlock);
@@ -234,7 +234,7 @@ SR_PrintAllEntries(tempDesc);
 
   //initialize some counters
   int BlockCount, iteratedBlocks = 0, bb=0;
-  BF_GetBlockCounter(fileDesc, &BlockCount);
+  BF_GetBlockCounter(tempDesc, &BlockCount);
 printf("---------------BLOCKCOUNT %d-------------\n", BlockCount);
   iteratedBlocks++; //skip the metadata block
   int lastRunSize = (BlockCount-1)%bufferSize;
