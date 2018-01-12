@@ -71,6 +71,37 @@ SR_ErrorCode SR_CloseFile(int fileDesc) {
   return SR_OK;
 }
 
+
+int SR_DestroyFile(char *fileName) {
+  BF_Block *tmpBlock;
+  BF_Block_Init(&tmpBlock);
+
+  int fileDesc;
+  char *data = NULL;
+
+
+  BF_OpenFile(fileName, &fileDesc);
+
+  BF_GetBlock(fileDesc, 0, tmpBlock);//Getting the first block
+  data = BF_Block_GetData(tmpBlock);//and its data
+
+  if (data == NULL || strcmp(data, "sort"))//to check if this new opened file is a sort file
+  {
+    BF_UnpinBlock(tmpBlock);
+    BF_Block_Destroy(&tmpBlock);
+    BF_CloseFile(fileDesc);
+    printf("File: %s to destroy is not a sort tree file. Exiting..\n", fileName);
+    exit(-1);
+  }
+
+  BF_UnpinBlock(tmpBlock);
+  BF_Block_Destroy(&tmpBlock);
+  BF_CloseFile(fileDesc);
+
+  remove(fileName);
+  return 1;
+}
+
 //helper method that copies the record counter and
 //the sizes of record in a new block
 int init_block(char * data, Record * record){
@@ -181,22 +212,19 @@ SR_ErrorCode SR_SortedFile(
 ) {
   if(bufferSize<3 || bufferSize>BF_BUFFER_SIZE)
     return BAD_bufferSize;
-  int fileDesc;
-  SR_OpenFile(input_filename,&fileDesc);
 /******************************************************************************
 ***********sort the file into runs and save them in a temporary file***********
 ******************************************************************************/
   //creating a copy of the input_file so it remains unchanged
+  int fileDesc,tempDesc;
+  SR_OpenFile(input_filename,&fileDesc);
   SR_CreateFile("tempSortFile");
-  int tempDesc;
   SR_OpenFile("tempSortFile", &tempDesc);
   CopyFile(fileDesc, tempDesc);
-  SR_CloseFile(input_filename);
+  SR_CloseFile(fileDesc);
+
 printf("Printing tempSortFile:---------------------------------------------\n");
 SR_PrintAllEntries(tempDesc);
-    //return SR_ERROR;
-  //EPISIS O TEMPDESC EPISTREFETE ANOIXTOS, NA KLEISTEI KAPOU PIO KATW
-
 
   /*initialize pinnedBlocks:  This is where we keep the BF_Block* of the blocks
                               that are currently pinned.*/
@@ -275,14 +303,15 @@ SR_PrintAllEntries(tempDesc);
   unsigned int iterations = ceil( (double)log(m)/(double)log(bufferSize-1) );
 
   int in_file = tempDesc; //this is where we get runs from
+  char in_filename[32] = "tempSortFile";
   int out_file;         //this is where we store merged runs to
-  if(iterations > 1){
-    SR_CreateFile("outFile1");
-    SR_OpenFile("outFile1",&out_file);
-  }
+  char out_filename[32];
+  if(iterations > 1)
+    strcpy(out_filename,"outFile1");
   else
-    SR_OpenFile(output_filename,&out_file);
-
+    strcpy(out_filename,output_filename);
+  SR_CreateFile(out_filename);
+  SR_OpenFile(out_filename,&out_file);
   /*initialize pinnedRuns:  This is where we keep the Runs
                             that are currently pinned.*/
   Run** pinnedRuns = malloc((bufferSize-1)*sizeof(Run *));
@@ -315,28 +344,28 @@ fflush(stdout);
 
     /*Flush and prepare for next iteration*/
     SR_CloseFile(in_file);
-    SR_Des
+    SR_DestroyFile(in_filename);
     in_file = out_file;
+    strcpy(in_filename,out_filename);
     if(iteration != iterations){
       //create a new out_file named "outFile*here_goes_iteration_number*"
-      char* new_file_name = "outFile";
+      strcpy(out_filename,"outFile");
       char file_serial_num[10];
       snprintf(file_serial_num, 10, "%d", iteration);//iteration as a string
-      strcat(new_file_name, file_serial_num);  //example "outFile16"
-      SR_CreateFile(new_file_name);
-      SR_OpenFile(new_file_name, &out_file);
+      strcat(out_filename, file_serial_num);  //example "outFile16"
+      SR_CreateFile(out_filename);
+      SR_OpenFile(out_filename, &out_file);
     }
     /*The last iteration must be written to the out_file*/
     else
       SR_OpenFile(output_filename,&out_file);
-    //run have been merged in groups, the new run is a whole group
+    //runs have been merged in groups, the new run is a whole group
     run_size = run_size*(bufferSize-1);
 printf("Outfile after iteration:%d---------------------------------------------\n", iteration);
-//SR_PrintAllEntries(out_file);
+SR_PrintAllEntries(out_file);
   }
 
-  //close all files
-  //SR_PrintAllEntries(tempDesc);
+  SR_CloseFile(out_file);
   return SR_OK;
 }
 
@@ -398,34 +427,4 @@ SR_ErrorCode SR_PrintAllEntries(int fileDesc) {
   BF_Block_Destroy(&block);
 
   return SR_OK;
-}
-
-int SR_DestroyIndex(char *fileName) {
-  BF_Block *tmpBlock;
-  BF_Block_Init(&tmpBlock);
-
-  int fileDesc;
-  char *data = NULL;
-
-
-  BF_OpenFile(fileName, &fileDesc);
-
-  BF_GetBlock(fileDesc, 0, tmpBlock);//Getting the first block
-  data = BF_Block_GetData(tmpBlock);//and its data
-
-  if (data == NULL || strcmp(data, "sort"))//to check if this new opened file is a sort file
-  {
-    BF_UnpinBlock(tmpBlock);
-    BF_Block_Destroy(&tmpBlock);
-    BF_CloseFile(fileDesc);
-    printf("File: %s to destroy is not a sort tree file. Exiting..\n", fileName);
-    exit(-1);
-  }
-
-  BF_UnpinBlock(tmpBlock);
-  BF_Block_Destroy(&tmpBlock);
-  BF_CloseFile(fileDesc);
-
-  remove(fileName);
-  return 1;
 }
