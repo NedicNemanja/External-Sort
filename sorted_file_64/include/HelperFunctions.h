@@ -48,7 +48,7 @@ void PinGroup(Run** pinnedRuns,int num_of_runs,
             int in_file,int* current_block_id,int run_size,
             int* num_of_unmerged_blocks,int lastRunSize,int bufferSize);
 
-//undoes PinRuns()
+//undoes PinGroup()
 void UnpinGroup(Run** pinnedRuns,int num_of_runs);
 
 #endif
