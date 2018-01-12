@@ -269,13 +269,18 @@ SR_PrintAllEntries(tempDesc);
 ******************************************************************************/
   int run_size = bufferSize;
   BlockCount--; //minus the metadata block
-  int in_file = tempDesc; //this is where we get runs from
-  int out_file;         //this is where we store merged runs to
-  SR_CreateFile("outFile1");
-  SR_OpenFile("outFile1",&out_file);
   //arithmetics to determine how many iterations we'll need to sort the file
   int m = ceil( (double)BlockCount/(double)bufferSize );
   unsigned int iterations = ceil( (double)log(m)/(double)log(bufferSize-1) );
+
+  int in_file = tempDesc; //this is where we get runs from
+  int out_file;         //this is where we store merged runs to
+  if(iterations > 1){
+    SR_CreateFile("outFile1");
+    SR_OpenFile("outFile1",&out_file);
+  }
+  else
+    SR_OpenFile(output_filename,&out_file);
 
   /*initialize pinnedRuns:  This is where we keep the Runs
                             that are currently pinned.*/
