@@ -14,9 +14,8 @@ Run* Run_init(int fileDesc, int current_block_id, int run_size){
 void Run_NextBlock(Run* run){
   BF_UnpinBlock(run->pinnedBlock);
   //run ended
-  if(--run->size == 0){
-    run->pinnedBlock = NULL;
-  }
+  if(--run->size == 0)
+	return;
   run->pinnedBlock_id++;
   BF_GetBlock(run->fileDesc, run->pinnedBlock_id, run->pinnedBlock);
 }
