@@ -187,12 +187,14 @@ SR_ErrorCode SR_SortedFile(
 ***********sort the file into runs and save them in a temporary file***********
 ******************************************************************************/
   //creating a copy of the input_file so it remains unchanged
-  //SR_CreateFile("tempSortFile");
+  SR_CreateFile("tempSortFile");
   int tempDesc;
   SR_OpenFile("tempSortFile", &tempDesc);
   CopyFile(fileDesc, tempDesc);
 printf("Printing tempSortFile:---------------------------------------------\n");
 SR_PrintAllEntries(tempDesc);
+  printf("Printed temp\n");
+  fflush(stdout);
     //return SR_ERROR;
   //EPISIS O TEMPDESC EPISTREFETE ANOIXTOS, NA KLEISTEI KAPOU PIO KATW
 
@@ -341,7 +343,7 @@ printf("Outfile after iteration:%d---------------------------------------------\
 
 SR_ErrorCode SR_PrintAllEntries(int fileDesc) {
   // Your code goes here
-  int blocks = 0, offset = 0, recs = 0;
+  int blocks = 0, offset = 0, recs = 0, id;;
   int rsize = sizeof(Record);
   char * data = NULL;
   BF_Block * block = NULL;
@@ -377,7 +379,6 @@ SR_ErrorCode SR_PrintAllEntries(int fileDesc) {
     //for each block print the entries
     for(int j=0; j< recs; j++){
       //print id
-      int id;
       memmove(&id, data+offset, id_size);
       printf("%d\n", id);
       offset += id_size;

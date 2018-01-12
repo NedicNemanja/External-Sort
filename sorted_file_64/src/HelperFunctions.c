@@ -147,23 +147,81 @@ void recordSwap(BF_Block** blockArray, int size, Index i, Index j){
 //all the bigger to its right. Pivot is selected to be every time the last element of the array
 Index partition(BF_Block** blockArray, int size, int fieldNo, Index low, Index high){
 	int b, r;
-	//printf("MPIKA\n");
+	printf("MPIKA me apo %db %dr ews %db %dr\n", low.blockIndex, low.recordIndex, high.blockIndex, high.recordIndex);
 
 	Record pivot = getRecordFromBlock(blockArray, size, high.blockIndex, high.recordIndex);
 	Index i = indexDecr(low);
+	int numRecs = (BF_BLOCK_SIZE - BLOCKBASEOFFSET) / SIZEOFRECORD;
 	//Iterate through all records from low to high
+
 	for (b = low.blockIndex; b <= high.blockIndex; b++){
-    for (r = low.recordIndex; r <= high.recordIndex - 1; r++){
-      Record tmpRec = getRecordFromBlock(blockArray, size, b, r);
-				//if the current record is smaller or equal to pivot
-			if (recordLessEqualThan(tmpRec, pivot, fieldNo)){
-				//printf("1\n");
-				i = indexIncr(i, size);
-				Index j;
-				j.blockIndex = b;
-				j.recordIndex = r;
-				//then swap them
-				recordSwap(blockArray, size, i, j);
+		if(b == low.blockIndex && b == high.blockIndex){
+			for (r = low.recordIndex; r <= high.recordIndex; r++){
+	    		if (b == high.blockIndex && r > (high.recordIndex - 1))
+	    		{
+	    			break;
+	    		}
+	      		Record tmpRec = getRecordFromBlock(blockArray, size, b, r);
+					//if the current record is smaller or equal to pivot
+				if (recordLessEqualThan(tmpRec, pivot, fieldNo)){
+					//printf("1\n");
+					i = indexIncr(i, size);
+					Index j;
+					j.blockIndex = b;
+					j.recordIndex = r;
+					//then swap them
+					recordSwap(blockArray, size, i, j);
+				}
+			}
+		}else if(b == low.blockIndex){
+			for (r = low.recordIndex; r <= numRecs - 1; r++){
+
+	      		Record tmpRec = getRecordFromBlock(blockArray, size, b, r);
+					//if the current record is smaller or equal to pivot
+				if (recordLessEqualThan(tmpRec, pivot, fieldNo)){
+					//printf("1\n");
+					i = indexIncr(i, size);
+					Index j;
+					j.blockIndex = b;
+					j.recordIndex = r;
+					//then swap them
+					recordSwap(blockArray, size, i, j);
+				}
+			}
+		}
+		else if (b == high.blockIndex){
+			for (r = low.recordIndex; r <= high.recordIndex; r++){
+				if (b == high.blockIndex && r > (high.recordIndex - 1)){
+	    			break;
+	    	}
+
+	      		Record tmpRec = getRecordFromBlock(blockArray, size, b, r);
+					//if the current record is smaller or equal to pivot
+				if (recordLessEqualThan(tmpRec, pivot, fieldNo)){
+					//printf("1\n");
+					i = indexIncr(i, size);
+					Index j;
+					j.blockIndex = b;
+					j.recordIndex = r;
+					//then swap them
+					recordSwap(blockArray, size, i, j);
+				}
+			}
+		}
+		else{
+			for (r = 0; r <= numRecs - 1; r++){
+
+	      		Record tmpRec = getRecordFromBlock(blockArray, size, b, r);
+					//if the current record is smaller or equal to pivot
+				if (recordLessEqualThan(tmpRec, pivot, fieldNo)){
+					//printf("1\n");
+					i = indexIncr(i, size);
+					Index j;
+					j.blockIndex = b;
+					j.recordIndex = r;
+					//then swap them
+					recordSwap(blockArray, size, i, j);
+				}
 			}
 		}
 	}
@@ -326,6 +384,10 @@ void SortAndStoreRuns(Run** runArray, int size, int fieldNo, int out_fileDesc){
 
 		target = BF_Block_GetData(outBlock);
 		//move the record to the sorted buffer and increment offsets
+		printf("%d %s %s %s\n", minRec->id, minRec->name, minRec->surname, minRec->city);
+		fflush(stdout);
+		printf("Of[s] %d\n", offsets[size]);
+		fflush(stdout);
 		memmove(target+offsets[size], minRec, SIZEOFRECORD);
 		offsets[min] += SIZEOFRECORD;
 		offsets[size] += SIZEOFRECORD;
@@ -374,7 +436,6 @@ void InsertBlock(int fileDesc, BF_Block* block){
 int CopyFile(int fileDesc1, int fileDesc2){
 	int blocks = 0, offset = 0, recs = 0;
 	char *data1 = NULL, *data2 = NULL;
-	char * message = "Sort";
 	BF_Block *block1 = NULL, *block2 = NULL;
 	int id_size = 0;
 	int name_size = 0;
@@ -383,15 +444,6 @@ int CopyFile(int fileDesc1, int fileDesc2){
 	BF_ErrorCode err;
 	BF_Block_Init(&block1);
 	BF_Block_Init(&block2);
-
-	BF_AllocateBlock(fileDesc2, block2);
-  //get pointer to block data
-  data2 = BF_Block_GetData(block2);
-  //write "sort" to know that it's a sort file
-  memmove(data2, message, sizeof(message));
-  //cleanup
-  BF_Block_SetDirty(block2);
-  BF_UnpinBlock(block2);
 
 	BF_GetBlockCounter(fileDesc1, &blocks);
 
