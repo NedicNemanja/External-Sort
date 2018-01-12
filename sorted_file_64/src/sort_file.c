@@ -298,11 +298,11 @@ fflush(stdout);
     /*load,sort,store all the groups one by one*/
     for(int g=0; g<groups_in_file; g++){
       /*load group to the buffers*/
-      PinGroup(pinnedRuns,in_file,&current_block_id,run_size,
-                          &num_of_unmerged_blocks,lastRunSize,bufferSize);
+      int group_size = PinGroup(pinnedRuns,in_file,&current_block_id,run_size,
+                            &num_of_unmerged_blocks,lastRunSize,bufferSize);
       //The buffers are full now. Just one block is left for the output.
       //Lets sort and store this group of runs
-      SortAndStoreRuns(pinnedRuns,bufferSize-1,fieldNo,out_file);
+      SortAndStoreRuns(pinnedRuns,group_size,fieldNo,out_file);
       //clean the pinnedRuns array
       UnpinGroup(pinnedRuns,bufferSize-1);
     }
