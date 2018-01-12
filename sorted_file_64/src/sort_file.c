@@ -261,7 +261,7 @@ SR_ErrorCode SR_SortedFile(
    Repeat until the whole file is a sorted run,
    but hold on for the last iteration,
    i want to save it specifically to out_file*/
-  for(int iteration=0; iteration<iterations-1; iteration++){
+  for(int iteration=1; iteration<=iterations; iteration++){
     int current_block_id = 1;
     int num_of_unmerged_blocks = BlockCount;
     //total number of runs in the file
@@ -287,19 +287,23 @@ SR_ErrorCode SR_SortedFile(
     SR_CloseFile(in_file);
     //in_file destroy
     in_file = out_file;
-    //create a new out_file named "outFile*here_goes_iteration_number*"
-    char* new_file_name = "outFile";
-    char file_serial_num[10];
-    snprintf(file_serial_num, 10, "%d", iteration);//iteration as a string
-    strcat(new_file_name,file_serial_num);  //example "outFile16"
-    SR_CreateFile(new_file_name);
-    SR_OpenFile(new_file_name,&out_file);
+    if(iteration != iterations){
+      //create a new out_file named "outFile*here_goes_iteration_number*"
+      char* new_file_name = "outFile";
+      char file_serial_num[10];
+      snprintf(file_serial_num, 10, "%d", iteration);//iteration as a string
+      strcat(new_file_name,file_serial_num);  //example "outFile16"
+      SR_CreateFile(new_file_name);
+      SR_OpenFile(new_file_name,&out_file);
+    }
+    /*The last iteration must be written to the out_file*/
+    else
+      SR_OpenFile(output_filename,&out_file);
     //run have been merged in groups, the new run is a whole group
     run_size = group_size;
   }
 
-  /*The last iteration is done separately so that we can control the out_file*/
-
+  //close all files
 
   return SR_OK;
 }
