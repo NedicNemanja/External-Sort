@@ -189,7 +189,8 @@ SR_ErrorCode SR_SortedFile(
   //SR_OpenFile("tempSortFile",&tempDesc);
   //CopyFile(tempDesc,fileDesc);
   //TO COPY GINETE LOW LEVEL BYTE PER BYTE XWRIS SR CREATE FILE KLP NA DEN LITOURGISEI TO KANOUME HIGH LEVEL
-  tempDesc = copyFile(input_filename, "tempSortFile");
+  //tempDesc = copyFile(input_filename, "tempSortFile");
+  tempDesc = fileDesc;
   //EPISIS O TEMPDESC EPISTREFETE ANOIXTOS, NA KLEISTEI KAPOU PIO KATW
 
   /*initialize pinnedBlocks:  This is where we keep the BF_Block* of the blocks
@@ -209,6 +210,15 @@ SR_ErrorCode SR_SortedFile(
       //get the run to the buffers
       for(int i=0; i<bufferSize; i++){
         BF_GetBlock(tempDesc,iteratedBlocks,pinnedBlocks[i]);
+        char * data = NULL;
+        //int offset = BLOCKBASEOFFSET + 0*SIZEOFRECORD;
+
+        //printf("BLOCK: %d RECORD: %d OFFSET: %d\n", requestedBlock, requestedRecord, offset);
+
+        data = BF_Block_GetData(pinnedBlocks[i]);
+        int id;
+        memmove(&id, data /*+ offset*/, sizeof(int));
+        printf("TO ID %d\n", id);
         iteratedBlocks++;
       }
       //sort the run
