@@ -234,7 +234,7 @@ SR_PrintAllEntries(tempDesc);
 
   //initialize some counters
   int BlockCount, iteratedBlocks = 0, bb=0;
-  BF_GetBlockCounter(fileDesc, &BlockCount);
+  BF_GetBlockCounter(tempDesc, &BlockCount);
 printf("---------------BLOCKCOUNT %d-------------\n", BlockCount);
   iteratedBlocks++; //skip the metadata block
   int lastRunSize = (BlockCount-1)%bufferSize;
