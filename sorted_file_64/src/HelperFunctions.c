@@ -222,10 +222,10 @@ int isFinished(int offset){
 }
 
 //initialize offsets array with specific offset
-void InitOffsets(int *offsets, int size, int offset){
-	offsets = malloc(size*sizeof(int));
+void InitOffsets(int **offsets, int size, int offset){
+	*offsets = malloc(size*sizeof(int));
 	for(int i=0; i<size; i++)
-		offsets[i] = offset;
+		(*offsets)[i] = offset;
 }
 
 void initBlock(BF_Block *block){
@@ -266,7 +266,7 @@ void SortAndStoreRuns(Run** runArray, int size, int fieldNo, int out_fileDesc){
 	int *offsets = NULL, end=0, min, recs;
 	char *target = NULL;
 	BF_Block *outBlock = NULL;
-	InitOffsets(offsets, size+1, BLOCKBASEOFFSET);
+	InitOffsets(&offsets, size+1, BLOCKBASEOFFSET);
 	BF_Block_Init(&outBlock);
 	//initialize the first block
 	BF_AllocateBlock(out_fileDesc, outBlock);
@@ -294,7 +294,6 @@ void SortAndStoreRuns(Run** runArray, int size, int fieldNo, int out_fileDesc){
 		while(!runArray[min]->size && min <size)
 			min++;
 		if(min >= size) break;
-		printf("Here\n");
 		Record *minRec = (Record *) (BF_Block_GetData(runArray[min]->pinnedBlock) + offsets[min]);
 		for(int i=min; i<size; i++){
 			if(!runArray[i]->size){
