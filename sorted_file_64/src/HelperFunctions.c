@@ -248,18 +248,19 @@ void SortAndStoreRuns(Run** runArray, int size, int fieldNo, int out_fileDesc){
 
 		Record *minRec = (Record *) BF_Block_GetData(runArray[min]->pinnedBlock) + offsets[min];
 		for(int i=min; i<size; i++){
-			if(runArray[i]->pinnedBlock == NULL){
+			if(runArray[i]->pinnedBlock == NULL ){
 				continue;
 			}
 			else{
 				//check here if block is at end
-				if(isFinished(offsets[i])){
-
-				}
-				Record *tRec = (Record *) BF_Block_GetData(runArray[i]->pinnedBlock) + offsets[i];
-				if(recordLessThan(tRec, minRec, fieldNo)){
-					min = i;
-					minRec = tRec;
+				if(isFinished(offsets[i]))
+					Run_NextBlock(runArray[i]);
+				if(runArray[i]->pinnedBlock != NULL){
+					Record *tRec = (Record *) BF_Block_GetData(runArray[i]->pinnedBlock) + offsets[i];
+					if(recordLessThan(tRec, minRec, fieldNo)){
+						min = i;
+						minRec = tRec;
+					}
 				}
 			}
 		}
