@@ -325,12 +325,12 @@ fflush(stdout);
       SR_OpenFile(output_filename,&out_file);
     //run have been merged in groups, the new run is a whole group
     run_size = run_size*(bufferSize-1);
-printf("Outfile after iteration:%d---------------------------------------------", iteration);
-SR_PrintAllEntries(out_file);
+printf("Outfile after iteration:%d---------------------------------------------\n", iteration);
+//SR_PrintAllEntries(out_file);
   }
 
   //close all files
-  SR_PrintAllEntries(tempDesc);
+  //SR_PrintAllEntries(tempDesc);
   return SR_OK;
 }
 
