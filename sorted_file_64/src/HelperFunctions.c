@@ -305,7 +305,7 @@ void SortAndStoreRuns(Run** runArray, int size, int fieldNo, int out_fileDesc){
 					Run_NextBlock(runArray[i]);
 					offsets[i] = BLOCKBASEOFFSET;
 				}
-				if(runArray[min]->size){
+				if(runArray[i]->size){
 					Record *tRec = (Record *) (BF_Block_GetData(runArray[i]->pinnedBlock) + offsets[i]);
 					if(recordLessThan(tRec, minRec, fieldNo)){
 						min = i;
