@@ -255,10 +255,12 @@ void SortAndStoreRuns(Run** runArray, int size, int fieldNo, int out_fileDesc){
 				//check here if block is at end
 				if(isFinished(offsets[i]))
 					Run_NextBlock(runArray[i]);
-				Record *tRec = (Record *) BF_Block_GetData(runArray[i]->pinnedBlock) + offsets[i];
-				if(recordLessThan(tRec, minRec, fieldNo)){
-					min = i;
-					minRec = tRec;
+				if(runArray[i]->pinnedBlock != NULL){
+					Record *tRec = (Record *) BF_Block_GetData(runArray[i]->pinnedBlock) + offsets[i];
+					if(recordLessThan(tRec, minRec, fieldNo)){
+						min = i;
+						minRec = tRec;
+					}
 				}
 			}
 		}
