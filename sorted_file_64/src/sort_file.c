@@ -261,6 +261,7 @@ printf("---------------BLOCKCOUNT %d-------------\n", BlockCount);
     BF_Block_Destroy(&pinnedBlocks[i]);
   }*/
 printf("QuickSorted tempSortFile:------------------------------------------\n");
+fflush(stdout);
 SR_PrintAllEntries(tempDesc);
 
 /******************************************************************************
@@ -279,7 +280,8 @@ SR_PrintAllEntries(tempDesc);
   /*initialize pinnedRuns:  This is where we keep the Runs
                             that are currently pinned.*/
   Run** pinnedRuns = malloc((bufferSize-1)*sizeof(Run *));
-printf("iterations:%d,BlockCount:%d,run_size:%d", iterations,BlockCount,run_size);
+printf("iterations:%d,BlockCount:%d,run_size:%d\n", iterations,BlockCount,run_size);
+fflush(stdout);
   /*Sort the whole file into bigger runs.
    Repeat until the whole file is a sorted run,
    but hold on for the last iteration,
@@ -291,13 +293,12 @@ printf("iterations:%d,BlockCount:%d,run_size:%d", iterations,BlockCount,run_size
     int runs_in_file = (int)ceil((double)BlockCount/(double)run_size);
     //number of run-groups
     int groups_in_file = (int)ceil((double)runs_in_file/(double)(bufferSize-1));
-    //group size in blocks
-    int group_size = run_size*(bufferSize-1);
-
+printf("runs_in_file:%d,groups_in_file:%d\n", runs_in_file,groups_in_file);
+fflush(stdout);
     /*load,sort,store all the groups one by one*/
     for(int g=0; g<groups_in_file; g++){
       /*load group to the buffers*/
-      PinGroup(pinnedRuns,bufferSize-1,in_file,&current_block_id,run_size,
+      PinGroup(pinnedRuns,in_file,&current_block_id,run_size,
                           &num_of_unmerged_blocks,lastRunSize,bufferSize);
       //The buffers are full now. Just one block is left for the output.
       //Lets sort and store this group of runs
@@ -323,7 +324,7 @@ printf("iterations:%d,BlockCount:%d,run_size:%d", iterations,BlockCount,run_size
     else
       SR_OpenFile(output_filename,&out_file);
     //run have been merged in groups, the new run is a whole group
-    run_size = group_size;
+    run_size = run_size*(bufferSize-1);
 printf("Outfile after iteration:%d---------------------------------------------", iteration);
 SR_PrintAllEntries(out_file);
   }

@@ -44,9 +44,8 @@ int CopyFile(int fileDesc1, int fileDesc2);
 void quickSort(BF_Block** blockArray, int size, int fieldNo, int lastRun, int lastRunSize);
 
 //load a group of runs to the buffer
-void PinGroup(Run** pinnedRuns,int num_of_runs,
-            int in_file,int* current_block_id,int run_size,
-            int* num_of_unmerged_blocks,int lastRunSize,int bufferSize);
+void PinGroup(Run** pinnedRuns,int in_file,int* current_block_id,int run_size,
+                  int* num_of_unmerged_blocks,int lastRunSize,int bufferSize);
 
 //undoes PinGroup()
 void UnpinGroup(Run** pinnedRuns,int num_of_runs);

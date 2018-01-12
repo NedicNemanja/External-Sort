@@ -398,9 +398,9 @@ int CopyFile(int fileDesc1, int fileDesc2){
 }
 
 
-void PinGroup(Run** pinnedRuns,int num_of_runs,
-						int in_file,int* current_block_id,int run_size,
-						int* num_of_unmerged_blocks,int lastRunSize, int bufferSize){
+void PinGroup(Run** pinnedRuns,int in_file,int* current_block_id,int run_size,
+							int* num_of_unmerged_blocks,int lastRunSize, int bufferSize)
+{
 	for(int buffer_index=0; buffer_index<=bufferSize-1; buffer_index++){
 		//pin a run and dedicate a buffer to it
 		pinnedRuns[buffer_index] = Run_init(in_file,*current_block_id,run_size);
