@@ -213,7 +213,7 @@ void quickSort(BF_Block** blockArray, int size, int fieldNo, int lastRun, int la
 int isFull(BF_Block *block){
 	int recs =0;
 	char * data = BF_Block_GetData(block);
-	memmove(&recs, data+4*sizeof(int), sizeof(int));
+	memmove(&recs, data, sizeof(int));
 	return BF_BLOCK_SIZE - BLOCKBASEOFFSET+(recs+1)*SIZEOFRECORD >= 0 ? 0 : 1;
 }
 
@@ -228,6 +228,16 @@ void InitOffsets(int *offsets, int size, int offset){
 		offsets[i] = 0;
 }
 
+void initFirstBlock(BF_Block *block){
+	char * message = "Sort", *data = NULL;
+	data = BF_Block_GetData(block);
+	//write "sort" to know that it's a sort file
+	memmove(data, message, sizeof(message));
+  //cleanup
+  BF_Block_SetDirty(block);
+  BF_UnpinBlock(block);
+}
+
 //NEME VALE ENA FILE EDO NA GRAFO
 void SortAndStoreRuns(Run** runArray, int size, int fieldNo, int out_fileDesc){
 	int *offsets = NULL, end=0, min, recs;
@@ -235,6 +245,11 @@ void SortAndStoreRuns(Run** runArray, int size, int fieldNo, int out_fileDesc){
 	BF_Block *outBlock = NULL;
 	InitOffsets(offsets, size, BLOCKBASEOFFSET);
 	BF_Block_Init(&outBlock);
+	//initialize the first block
+	BF_AllocateBlock(out_fileDesc, outBlock);
+	initFirstBlock(outBlock);
+
+	BF_AllocateBlock(out_fileDesc, outBlock);
 	//heap theheap;
 	//makeheap(blockArray, size-1, fieldNo, &theheap);
 	//while(theheap.size >0){
@@ -254,7 +269,7 @@ void SortAndStoreRuns(Run** runArray, int size, int fieldNo, int out_fileDesc){
 			min++;
 		if(min >= size) break;
 
-		Record *minRec = (Record *) BF_Block_GetData(runArray[min]->pinnedBlock) + offsets[min];
+		Record *minRec = (Record *) (BF_Block_GetData(runArray[min]->pinnedBlock) + offsets[min]);
 		for(int i=min; i<size; i++){
 			if(runArray[i]->pinnedBlock == NULL ){
 				continue;
