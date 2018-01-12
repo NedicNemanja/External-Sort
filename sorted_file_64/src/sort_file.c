@@ -194,8 +194,6 @@ SR_ErrorCode SR_SortedFile(
   printf("Printing new\n");
   //SR_PrintAllEntries(tempDesc);
     //return SR_ERROR;
-  //TO COPY GINETE LOW LEVEL BYTE PER BYTE XWRIS SR CREATE FILE KLP NA DEN LITOURGISEI TO KANOUME HIGH LEVEL
-  //tempDesc = copyFile(input_filename, "tempSortFile");
   //EPISIS O TEMPDESC EPISTREFETE ANOIXTOS, NA KLEISTEI KAPOU PIO KATW
 
   /*initialize pinnedBlocks:  This is where we keep the BF_Block* of the blocks
@@ -218,22 +216,7 @@ SR_ErrorCode SR_SortedFile(
           BF_Block_Init(&pinnedBlocks[i]);
       for(int i=0; i<bufferSize; i++){
         BF_GetBlockCounter(tempDesc, &bb);
-        //printf("Blocks %d\nIt:%d\n", bb, iteratedBlocks);
-        fflush(stdout);
         BF_GetBlock(tempDesc, iteratedBlocks, pinnedBlocks[i]);
-        char * data = NULL;
-        //int offset = BLOCKBASEOFFSET + 0*SIZEOFRECORD;
-
-        //printf("BLOCK: %d RECORD: %d OFFSET: %d\n", requestedBlock, requestedRecord, offset);
-        //printf("EEP\n");
-        data = BF_Block_GetData(pinnedBlocks[i]);
-        if (data == NULL)
-        {
-          printf("OPA MALAKA ELOUSES\n");
-        }
-        int id;
-        memmove(&id, data /*+ offset*/, sizeof(int));
-        printf("TO ID %d\n", id);
         iteratedBlocks++;
       }
       printf("quick\n");
@@ -275,23 +258,23 @@ SR_ErrorCode SR_SortedFile(
   /*for(int i=0; i<bufferSize; i++){
     BF_Block_Destroy(&pinnedBlocks[i]);
   }*/
-  SR_PrintAllEntries(tempDesc);
+  //SR_PrintAllEntries(tempDesc);
 /******************************************************************************
 **************merge the runs and store them in the output_filename*************
 ******************************************************************************/
   int run_size = bufferSize;
   BlockCount--; //minus the metadata block
-  int in_file=tempDesc; //this is where we get runs from
+  int in_file = tempDesc; //this is where we get runs from
   int out_file;         //this is where we store merged runs to
   SR_CreateFile("outFile1");
   SR_OpenFile("outFile1",&out_file);
   //arithmetics to determine how many iterations we'll need to sort the file
-  int m = (int)ceil( (double)BlockCount/(double)bufferSize );
-  int iterations = (int)(log(bufferSize-1)/log(m));
+  int m = ceil( (double)BlockCount/(double)bufferSize );
+  int iterations = log(bufferSize-1)/log(m);
 
   /*initialize pinnedRuns:  This is where we keep the Runs
                             that are currently pinned.*/
-  Run* pinnedRuns[bufferSize-1];
+  Run** pinnedRuns = malloc((bufferSize-1)*sizeof(Run *));
   printf("E1\n");
   fflush(stdout);
   /*Sort the whole file into bigger runs.
@@ -329,9 +312,9 @@ SR_ErrorCode SR_SortedFile(
       char* new_file_name = "outFile";
       char file_serial_num[10];
       snprintf(file_serial_num, 10, "%d", iteration);//iteration as a string
-      strcat(new_file_name,file_serial_num);  //example "outFile16"
+      strcat(new_file_name, file_serial_num);  //example "outFile16"
       SR_CreateFile(new_file_name);
-      SR_OpenFile(new_file_name,&out_file);
+      SR_OpenFile(new_file_name, &out_file);
     }
     /*The last iteration must be written to the out_file*/
     else
@@ -341,6 +324,8 @@ SR_ErrorCode SR_SortedFile(
   }
 
   //close all files
+  SR_PrintAllEntries(tempDesc);
+  free(pinnedRuns);
   free(pinnedBlocks);
   return SR_OK;
 }
