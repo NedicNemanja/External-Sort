@@ -232,7 +232,6 @@ SR_ErrorCode SR_SortedFile(
   //initialize some counters
   int BlockCount, iteratedBlocks = 0;
   BF_GetBlockCounter(tempDesc, &BlockCount);
-printf("---------------BLOCKCOUNT %d-------------\n", BlockCount);
   iteratedBlocks++; //skip the metadata block
   int lastRunSize = (BlockCount-1)%bufferSize;
 
@@ -259,7 +258,6 @@ printf("---------------BLOCKCOUNT %d-------------\n", BlockCount);
   for(int i=0; i<lastRunSize; i++)
       BF_Block_Init(&pinnedBlocks[i]);
   //***do the last run as well***
-  //MPOREI TO LAST RUN NA DIERITE AKRIVWS EDW KAI NA MIN IPARXEI, NA VALOUME IF AN IPARXEI NA KANEI TA APO KATW?
   //get the last run to the buffers
   for(int i=0; i<lastRunSize; i++){
     BF_GetBlock(tempDesc,iteratedBlocks,pinnedBlocks[i]);
@@ -276,10 +274,7 @@ printf("---------------BLOCKCOUNT %d-------------\n", BlockCount);
     BF_Block_Destroy(&pinnedBlocks[i]);
     //pinnedBlocks[i] = NULL;
   }
-  //destroy pinnedBlocks to free the buffers
-  /*for(int i=0; i<bufferSize; i++){
-    BF_Block_Destroy(&pinnedBlocks[i]);
-  }*/
+  free(pinnedBlocks);
 /******************************************************************************
 **************merge the runs and store them in the output_filename*************
 ******************************************************************************/
@@ -302,8 +297,7 @@ printf("---------------BLOCKCOUNT %d-------------\n", BlockCount);
   /*initialize pinnedRuns:  This is where we keep the Runs
                             that are currently pinned.*/
   Run** pinnedRuns = malloc((bufferSize-1)*sizeof(Run *));
-printf("iterations:%d,BlockCount:%d,run_size:%d,lastRunSize:%d\n", iterations,BlockCount,run_size,lastRunSize);
-fflush(stdout);
+
   /*Sort the whole file into bigger runs.
    Repeat until the whole file is a sorted run,
    but hold on for the last iteration,
@@ -315,8 +309,7 @@ fflush(stdout);
     int runs_in_file = (int)ceil((double)BlockCount/(double)run_size);
     //number of run-groups
     int groups_in_file = (int)ceil((double)runs_in_file/(double)(bufferSize-1));
-printf("runs_in_file:%d,groups_in_file:%d\n", runs_in_file,groups_in_file);
-fflush(stdout);
+
     /*load,sort,store all the groups one by one*/
     for(int g=0; g<groups_in_file; g++){
       /*load group to the buffers*/
@@ -329,11 +322,10 @@ fflush(stdout);
       UnpinGroup(pinnedRuns,group_size);
     }
 
-    /*Flush and prepare for next iteration*/
+    /*Swap files and prepare for next iteration*/
     SR_CloseFile(in_file);
     SR_DestroyFile(in_filename);
     in_file = out_file;
-    printf("infile:%s outfile:%s\n", in_filename,out_filename);
     strcpy(in_filename,out_filename);
     /*The last iteration must be written to the out_file*/
     if(iteration+1 == iterations){ //if the next iteration is the last iteration
@@ -353,16 +345,10 @@ fflush(stdout);
     //runs have been merged in groups, the new run is a whole group
     run_size = run_size*(bufferSize-1);
     lastRunSize = BlockCount%run_size;
-    int b;
-    BF_GetBlockCounter(in_file,&b);
-printf("Outfile after iteration%d: blockcount:%d New run_size:%d,lastRunSize:%d\n---------------------------------------------\n", iteration,b,run_size,lastRunSize);
-
   }
-  SR_PrintAllEntries(out_file);
-  fflush(stdout);
+  //The whole file is sorted now
   SR_CloseFile(out_file);
   free(pinnedRuns);
-  free(pinnedBlocks);
   return SR_OK;
 }
 
