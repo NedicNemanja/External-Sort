@@ -346,12 +346,13 @@ fflush(stdout);
     SR_CloseFile(in_file);
     SR_DestroyFile(in_filename);
     in_file = out_file;
+    printf("infile:%s outfile:%s\n", in_filename,out_filename);
     strcpy(in_filename,out_filename);
     if(iteration != iterations){
       //create a new out_file named "outFile*here_goes_iteration_number*"
       strcpy(out_filename,"outFile");
       char file_serial_num[10];
-      snprintf(file_serial_num, 10, "%d", iteration);//iteration as a string
+      snprintf(file_serial_num, 10, "%d", iteration+1);//iteration as a string
       strcat(out_filename, file_serial_num);  //example "outFile16"
       SR_CreateFile(out_filename);
       SR_OpenFile(out_filename, &out_file);
@@ -362,7 +363,7 @@ fflush(stdout);
     //runs have been merged in groups, the new run is a whole group
     run_size = run_size*(bufferSize-1);
 printf("Outfile after iteration:%d---------------------------------------------\n", iteration);
-SR_PrintAllEntries(out_file);
+//SR_PrintAllEntries(out_file);
   }
 
   SR_CloseFile(out_file);
