@@ -516,7 +516,7 @@ int PinGroup(Run** pinnedRuns,int in_file,int* current_block_id,int run_size,
 							int* num_of_unmerged_blocks,int lastRunSize, int bufferSize)
 {
 	int group_size=0;
-	for(int buffer_index=0; buffer_index<=bufferSize-1; buffer_index++){
+	for(int buffer_index=0; buffer_index<bufferSize-1; buffer_index++){
 		//if there are more runs to merge
 		if(*num_of_unmerged_blocks > 0){
 			//if this is a regular run
