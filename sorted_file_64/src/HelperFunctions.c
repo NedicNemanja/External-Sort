@@ -377,6 +377,8 @@ void SortAndStoreRuns(Run** runArray, int size, int fieldNo, int out_fileDesc){
 		Record *minRec = (Record *) (BF_Block_GetData(runArray[min]->pinnedBlock) + offsets[min]);
 		//printf("minRec %d %s %s %s\n", minRec->id, minRec->name, minRec->surname, minRec->city);
 		for(int i=min+1; i<size; i++){
+			printf("NE\n");
+			fflush(stdout);
 			if(!runArray[i]->size){
 				continue;
 			}
@@ -405,9 +407,9 @@ void SortAndStoreRuns(Run** runArray, int size, int fieldNo, int out_fileDesc){
 
 		target = BF_Block_GetData(outBlock);
 		//move the record to the sorted buffer and increment offsets
-		//printf("%d %s %s %s\n", minRec->id, minRec->name, minRec->surname, minRec->city);
+		printf("%d %s %s %s\n", minRec->id, minRec->name, minRec->surname, minRec->city);
 		fflush(stdout);
-		//printf("Of[s] %d\n", offsets[size]);
+		printf("Of[s] %d\n", offsets[size]);
 		fflush(stdout);
 		memmove(target+offsets[size], minRec, SIZEOFRECORD);
 		offsets[min] += SIZEOFRECORD;
@@ -431,7 +433,8 @@ void SortAndStoreRuns(Run** runArray, int size, int fieldNo, int out_fileDesc){
 		//else{
 				//theheap.size--;
 		//}
-
+	printf("Bye bye!\n");
+	fflush(stdout);
 	//cleanup
 	//destroyheap(&theheap);
 	BF_Block_SetDirty(outBlock);
