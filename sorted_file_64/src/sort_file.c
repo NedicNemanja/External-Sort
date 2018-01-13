@@ -229,11 +229,9 @@ SR_PrintAllEntries(tempDesc);
   /*initialize pinnedBlocks:  This is where we keep the BF_Block* of the blocks
                               that are currently pinned.*/
   BF_Block** pinnedBlocks = malloc(bufferSize*sizeof(BF_Block*));
-  for(int i=0; i<bufferSize; i++)
-      BF_Block_Init(&pinnedBlocks[i]);
 
   //initialize some counters
-  int BlockCount, iteratedBlocks = 0, bb=0;
+  int BlockCount, iteratedBlocks = 0;
   BF_GetBlockCounter(tempDesc, &BlockCount);
 printf("---------------BLOCKCOUNT %d-------------\n", BlockCount);
   iteratedBlocks++; //skip the metadata block
@@ -246,7 +244,6 @@ printf("---------------BLOCKCOUNT %d-------------\n", BlockCount);
       for(int i=0; i<bufferSize; i++)
           BF_Block_Init(&pinnedBlocks[i]);
       for(int i=0; i<bufferSize; i++){
-        BF_GetBlockCounter(tempDesc, &bb);
         BF_GetBlock(tempDesc, iteratedBlocks, pinnedBlocks[i]);
         iteratedBlocks++;
       }
