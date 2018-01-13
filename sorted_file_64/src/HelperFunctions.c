@@ -293,7 +293,7 @@ Index partition(BF_Block** blockArray, int size, int fieldNo, Index low, Index h
 	i = indexIncr(i, size, blockArray);
 	recordSwap(blockArray, size, i, high);
 	//printf("META TO PART\n");
-	printBlockArray(blockArray, high.blockIndex + 1);
+	//printBlockArray(blockArray, high.blockIndex + 1);
 	return i;
 }
 //LOW IS 0 HIGH IS MAX - 1
@@ -317,7 +317,7 @@ void QuickSortRun(BF_Block** blockArray, int size, int fieldNo, Index low, Index
 			//printf("MPAINW INCR\n");
 			QuickSortRun(blockArray, size, fieldNo, increasedPart, high);
 		}else{
-			printf("DEN MPENW TELIKA\n");
+			//printf("DEN MPENW TELIKA\n");
 		}
 	}
 }
@@ -331,7 +331,7 @@ void quickSort(BF_Block** blockArray, int size, int fieldNo, int lastRun, int la
 	low.recordIndex = 0;
 
 	if(lastRun){
-		printBlockArray(blockArray, lastRunSize);
+		//printBlockArray(blockArray, lastRunSize);
 		high.blockIndex = lastRunSize - 1;
 
 		data = BF_Block_GetData(blockArray[lastRunSize-1]);
@@ -343,7 +343,7 @@ void quickSort(BF_Block** blockArray, int size, int fieldNo, int lastRun, int la
 		high.recordIndex--;
 	}
 	else{
-		printBlockArray(blockArray, size);
+		//printBlockArray(blockArray, size);
 		high.blockIndex = size - 1;
 		data = BF_Block_GetData(blockArray[(size - 1)]);
 		memmove(&(high.recordIndex), data, sizeof(int));
