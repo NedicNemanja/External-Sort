@@ -514,25 +514,30 @@ int PinGroup(Run** pinnedRuns,int in_file,int* current_block_id,int run_size,
 {
 	int group_size=0;
 	for(int buffer_index=0; buffer_index<=bufferSize-1; buffer_index++){
-		//pin a run and dedicate a buffer to it
-		pinnedRuns[buffer_index] = Run_init(in_file,*current_block_id,run_size);
-		group_size++;
-		//mark this run as merged
-		*num_of_unmerged_blocks -= run_size;
-		//if only the last run is left
-		if(*num_of_unmerged_blocks == lastRunSize && lastRunSize != 0){
-			*current_block_id += lastRunSize;
-			pinnedRuns[buffer_index] = Run_init(in_file,*current_block_id,lastRunSize);
-			group_size++;
-			*num_of_unmerged_blocks -= lastRunSize;
-			break;
+		//if there are more runs to merge
+		if(*num_of_unmerged_blocks > 0){
+			//if this is a regular run
+			if(*num_of_unmerged_blocks > lastRunSize){
+				pinnedRuns[buffer_index] = Run_init(in_file,*current_block_id,run_size);
+				group_size++;
+				//mark this run as merged
+				*num_of_unmerged_blocks -= run_size;
+				//look ahead
+				*current_block_id += run_size;
+			}
+			//if this is the last run
+			else{
+				*current_block_id -= run_size;
+				*current_block_id += lastRunSize;
+				pinnedRuns[buffer_index] = Run_init(in_file,*current_block_id,lastRunSize);
+				group_size++;
+				*num_of_unmerged_blocks -= lastRunSize;
+			}
 		}
-		else if(*num_of_unmerged_blocks == 0)
-			break;
+		//nothing left to merge in this group
 		else
-			*current_block_id += run_size;
+			return group_size;
 	}
-	return group_size;
 }
 
 void UnpinGroup(Run** pinnedRuns,int num_of_runs){
