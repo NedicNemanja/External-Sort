@@ -373,7 +373,7 @@ void SortAndStoreRuns(Run** runArray, int size, int fieldNo, int out_fileDesc){
 				break;
 		}
 		if(min >= size) break;
-		printf("Found min %d, run->size %d, offset: %d\n", min, runArray[min]->size, offsets[min]);
+		//printf("Found min %d, run->size %d, offset: %d\n", min, runArray[min]->size, offsets[min]);
 		Record *minRec = (Record *) (BF_Block_GetData(runArray[min]->pinnedBlock) + offsets[min]);
 		//printf("minRec %d %s %s %s\n", minRec->id, minRec->name, minRec->surname, minRec->city);
 		for(int i=min+1; i<size; i++){
@@ -391,9 +391,9 @@ void SortAndStoreRuns(Run** runArray, int size, int fieldNo, int out_fileDesc){
 				}
 				if(runArray[i]->size){
 					Record *tRec = (Record *) (BF_Block_GetData(runArray[i]->pinnedBlock) + offsets[i]);
-					printf("tRec %d %s %s %s\n", tRec->id, tRec->name, tRec->surname, tRec->city);
+					//printf("tRec %d %s %s %s\n", tRec->id, tRec->name, tRec->surname, tRec->city);
 					fflush(stdout);
-					printf("offsets[min]: %d, offsets[i]: %d, offsets[size]: %d\n", offsets[min], offsets[i], offsets[size]);
+					//printf("offsets[min]: %d, offsets[i]: %d, offsets[size]: %d\n", offsets[min], offsets[i], offsets[size]);
 					fflush(stdout);
 					if(recordLessThan(tRec, minRec, fieldNo)){
 						min = i;
@@ -405,9 +405,9 @@ void SortAndStoreRuns(Run** runArray, int size, int fieldNo, int out_fileDesc){
 
 		target = BF_Block_GetData(outBlock);
 		//move the record to the sorted buffer and increment offsets
-		printf("%d %s %s %s\n", minRec->id, minRec->name, minRec->surname, minRec->city);
+		//printf("%d %s %s %s\n", minRec->id, minRec->name, minRec->surname, minRec->city);
 		fflush(stdout);
-		printf("Of[s] %d\n", offsets[size]);
+		//printf("Of[s] %d\n", offsets[size]);
 		fflush(stdout);
 		memmove(target+offsets[size], minRec, SIZEOFRECORD);
 		offsets[min] += SIZEOFRECORD;
