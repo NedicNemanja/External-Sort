@@ -409,25 +409,17 @@ void initBlock(BF_Block *block){
 
 //NEME VALE ENA FILE EDO NA GRAFO
 void SortAndStoreRuns(Run** runArray, int size, int fieldNo, int out_fileDesc){
-	int fullct = 0;
 	int *offsets = NULL, end=0, min, recs;
 	char *target = NULL;
 	BF_Block *outBlock = NULL;
 	InitOffsets(&offsets, size+1, BLOCKBASEOFFSET);
 	BF_Block_Init(&outBlock);
-	//initialize the first block
-	//BF_AllocateBlock(out_fileDesc, outBlock);
-	//initFirstBlock(outBlock);
-	fullct++;
+
 	BF_AllocateBlock(out_fileDesc, outBlock);
 	initBlock(outBlock);
 	//heap theheap;
 	//makeheap(blockArray, size-1, fieldNo, &theheap);
 	//while(theheap.size >0){
-	//for(int i=0; i<size; i++){
-		//printf("array[%d] has size %d\n", i, runArray[i]->size);
-	//}
-	fflush(stdout);
 
 	while(!end){
 		//check if last buffer is full
@@ -451,8 +443,6 @@ void SortAndStoreRuns(Run** runArray, int size, int fieldNo, int out_fileDesc){
 		if(min >= size) break;
 
 		if(isFull(outBlock)){
-			fullct++;
-			//printf("Block is full\n");
 			//allocate a new one
 			BF_Block_SetDirty(outBlock);
 			BF_UnpinBlock(outBlock);
@@ -470,22 +460,13 @@ void SortAndStoreRuns(Run** runArray, int size, int fieldNo, int out_fileDesc){
 				continue;
 			}
 			else{
-				//printf("offsets[i]: %d\n", offsets[i]);
 				//check here if block is at end
-				//printf("min is %d, i is %d, size is %d,runArray[i]->size is %d\n", min, i, size, runArray[i]->size);
-				//printf("pinned block id is %d\n", runArray[i]->pinnedBlock_id);
 				if(isFinished(runArray[i]->pinnedBlock, offsets[i])){
-					//printf("Is finished!\n");
-					//fflush(stdout);
 					Run_NextBlock(runArray[i]);
 					offsets[i] = BLOCKBASEOFFSET;
 				}
 				if(runArray[i]->size){
 					Record *tRec = (Record *) (BF_Block_GetData(runArray[i]->pinnedBlock) + offsets[i]);
-					//printf("tRec %d %s %s %s\n", tRec->id, tRec->name, tRec->surname, tRec->city);
-					fflush(stdout);
-					//printf("offsets[min]: %d, offsets[i]: %d, offsets[size]: %d\n", offsets[min], offsets[i], offsets[size]);
-					fflush(stdout);
 					if(recordLessThan(tRec, minRec, fieldNo)){
 						min = i;
 						minRec = tRec;
@@ -496,11 +477,6 @@ void SortAndStoreRuns(Run** runArray, int size, int fieldNo, int out_fileDesc){
 
 		target = BF_Block_GetData(outBlock);
 		//move the record to the sorted buffer and increment offsets
-		//printf("Of[m] %d, min %d size %d\n", offsets[min], min, size);
-		//printf("runArray[min]->size %d\n", runArray[min]->size);
-		fflush(stdout);
-		//printf("%d %s %s %s\n", minRec->id, minRec->name, minRec->surname, minRec->city);
-		fflush(stdout);
 		memmove(target+offsets[size], minRec, SIZEOFRECORD);
 		offsets[min] += SIZEOFRECORD;
 		offsets[size] += SIZEOFRECORD;
@@ -523,12 +499,6 @@ void SortAndStoreRuns(Run** runArray, int size, int fieldNo, int out_fileDesc){
 		//else{
 				//theheap.size--;
 		//}
-	//printf("Bye bye cruel world!, fullct =%d\n",fullct);
-	fflush(stdout);
-	//for(int i=0; i<size; i++){
-		//printf("array[%d] has size %d\n", i, runArray[i]->size);
-	//}
-	fflush(stdout);
 	//cleanup
 	//destroyheap(&theheap);
 	BF_Block_SetDirty(outBlock);
