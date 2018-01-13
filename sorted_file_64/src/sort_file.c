@@ -345,8 +345,11 @@ fflush(stdout);
     in_file = out_file;
     printf("infile:%s outfile:%s\n", in_filename,out_filename);
     strcpy(in_filename,out_filename);
-    if(iteration != iterations){
-      //create a new out_file named "outFile*here_goes_iteration_number*"
+    /*The last iteration must be written to the out_file*/
+    if(iteration+1 == iterations) //if the next iteration is the last iteration
+      SR_OpenFile(output_filename,&out_file);
+    //create a new out_file named "outFile*here_goes_iteration_number*"
+    else{
       strcpy(out_filename,"outFile");
       char file_serial_num[10];
       snprintf(file_serial_num, 10, "%d", iteration+1);//iteration as a string
@@ -354,9 +357,6 @@ fflush(stdout);
       SR_CreateFile(out_filename);
       SR_OpenFile(out_filename, &out_file);
     }
-    /*The last iteration must be written to the out_file*/
-    else
-      SR_OpenFile(output_filename,&out_file);
     //runs have been merged in groups, the new run is a whole group
     run_size = run_size*(bufferSize-1);
     lastRunSize = BlockCount%run_size;
