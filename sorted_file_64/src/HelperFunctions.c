@@ -320,16 +320,6 @@ void initBlock(BF_Block *block){
   offset += sizeof(int);
 }
 
-void initFirstBlock(BF_Block *block){
-	char * message = "Sort", *data = NULL;
-	data = BF_Block_GetData(block);
-	//write "sort" to know that it's a sort file
-	memmove(data, message, sizeof(message));
-  //cleanup
-  BF_Block_SetDirty(block);
-  BF_UnpinBlock(block);
-}
-
 //NEME VALE ENA FILE EDO NA GRAFO
 void SortAndStoreRuns(Run** runArray, int size, int fieldNo, int out_fileDesc){
 	int *offsets = NULL, end=0, min, recs;
@@ -415,10 +405,10 @@ void SortAndStoreRuns(Run** runArray, int size, int fieldNo, int out_fileDesc){
 
 		target = BF_Block_GetData(outBlock);
 		//move the record to the sorted buffer and increment offsets
-		//printf("%d %s %s %s\n", minRec->id, minRec->name, minRec->surname, minRec->city);
-		//fflush(stdout);
-		//printf("Of[m] %d, min %d size %d\n", offsets[min], min, size);
-		//printf("runArray[min]->size%d\n", runArray[min]->size);
+		printf("Of[m] %d, min %d size %d\n", offsets[min], min, size);
+		printf("runArray[min]->size %d\n", runArray[min]->size);
+		fflush(stdout);
+		printf("%d %s %s %s\n", minRec->id, minRec->name, minRec->surname, minRec->city);
 		fflush(stdout);
 		memmove(target+offsets[size], minRec, SIZEOFRECORD);
 		offsets[min] += SIZEOFRECORD;
