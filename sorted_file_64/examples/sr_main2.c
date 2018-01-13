@@ -36,7 +36,6 @@ int main() {
   SR_CloseFile(fileDesc);
   printf("Sorting 'unsorted_data.db' file in field 'surname' ...\n");
   fflush(stdout);
-  return 1;
   CALL_OR_DIE(SR_SortedFile("unsorted_data.db", "sorted_surname.db", 2, 33))
   printf("Sorting sorted_surname.db file in 'field' ...\n");
   fflush(stdout);
