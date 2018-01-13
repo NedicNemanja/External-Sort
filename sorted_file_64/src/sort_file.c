@@ -347,11 +347,12 @@ fflush(stdout);
     strcpy(in_filename,out_filename);
     /*The last iteration must be written to the out_file*/
     if(iteration+1 == iterations){ //if the next iteration is the last iteration
+      SR_CreateFile(out_filename);
       SR_OpenFile(output_filename,&out_file);
-      strcpy(out_filename, output_filename);
+      strcpy(out_filename,output_filename);
     }
     //create a new out_file named "outFile*here_goes_iteration_number*"
-    else{
+    else if(iteration != iterations){ //if its the last iteration we wont need an outfile
       strcpy(out_filename,"outFile");
       char file_serial_num[10];
       snprintf(file_serial_num, 10, "%d", iteration+1);//iteration as a string
