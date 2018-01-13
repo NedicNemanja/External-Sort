@@ -1,5 +1,4 @@
 #include <stdlib.h>
-#include <stdio.h>
 #include "Run.h"
 
 Run* Run_init(int fileDesc, int current_block_id, int run_size){
