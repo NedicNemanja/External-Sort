@@ -223,9 +223,6 @@ SR_ErrorCode SR_SortedFile(
   CopyFile(fileDesc, tempDesc);
   SR_CloseFile(fileDesc);
 
-printf("Printing tempSortFile:---------------------------------------------\n");
-SR_PrintAllEntries(tempDesc);
-
   /*initialize pinnedBlocks:  This is where we keep the BF_Block* of the blocks
                               that are currently pinned.*/
   BF_Block** pinnedBlocks = malloc(bufferSize*sizeof(BF_Block*));
@@ -247,8 +244,6 @@ printf("---------------BLOCKCOUNT %d-------------\n", BlockCount);
         BF_GetBlock(tempDesc, iteratedBlocks, pinnedBlocks[i]);
         iteratedBlocks++;
       }
-      printf("quick\n");
-      fflush(stdout);
       //sort the run
       quickSort(pinnedBlocks, bufferSize, fieldNo, 0, lastRunSize);
       //store the sorted run back to the temp_file
@@ -259,8 +254,6 @@ printf("---------------BLOCKCOUNT %d-------------\n", BlockCount);
         //pinnedBlocks[i] = NULL;
       }
   }
-  printf("EDOOO\n");
-  fflush(stdout);
   for(int i=0; i<lastRunSize; i++)
       BF_Block_Init(&pinnedBlocks[i]);
   //***do the last run as well***
@@ -272,7 +265,6 @@ printf("---------------BLOCKCOUNT %d-------------\n", BlockCount);
   }
   //sort the last run
   //EDW TO HIGH EINAI ALLO E
-  printf("LastRunSize %d\n", lastRunSize);
   if(lastRunSize)
     quickSort(pinnedBlocks, bufferSize, fieldNo, 1, lastRunSize);
   //store it
@@ -286,10 +278,6 @@ printf("---------------BLOCKCOUNT %d-------------\n", BlockCount);
   /*for(int i=0; i<bufferSize; i++){
     BF_Block_Destroy(&pinnedBlocks[i]);
   }*/
-printf("QuickSorted tempSortFile:------------------------------------------\n");
-fflush(stdout);
-SR_PrintAllEntries(tempDesc);
-
 /******************************************************************************
 **************merge the runs and store them in the output_filename*************
 ******************************************************************************/
@@ -347,7 +335,7 @@ fflush(stdout);
     strcpy(in_filename,out_filename);
     /*The last iteration must be written to the out_file*/
     if(iteration+1 == iterations){ //if the next iteration is the last iteration
-      SR_CreateFile(out_filename);
+      SR_CreateFile(output_filename);
       SR_OpenFile(output_filename,&out_file);
       strcpy(out_filename,output_filename);
     }
