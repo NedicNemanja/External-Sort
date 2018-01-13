@@ -229,8 +229,6 @@ SR_PrintAllEntries(tempDesc);
   /*initialize pinnedBlocks:  This is where we keep the BF_Block* of the blocks
                               that are currently pinned.*/
   BF_Block** pinnedBlocks = malloc(bufferSize*sizeof(BF_Block*));
-  for(int i=0; i<bufferSize; i++)
-      BF_Block_Init(&pinnedBlocks[i]);
 
   //initialize some counters
   int BlockCount, iteratedBlocks = 0, bb=0;
@@ -413,13 +411,13 @@ SR_ErrorCode SR_PrintAllEntries(int fileDesc) {
     for(int j=0; j< recs; j++){
       //print id
       memmove(&id, data+offset, id_size);
-      printf("%d\n", id);
+      printf("%d ", id);
       offset += id_size;
       //print name
-      printf("%s\n", data+offset);
+      printf("%s ", data+offset);
       offset += name_size;
       //print surname
-      printf("%s\n", data+offset);
+      printf("%s ", data+offset);
       offset += sur_size;
       //print city
       printf("%s\n", data+offset);
