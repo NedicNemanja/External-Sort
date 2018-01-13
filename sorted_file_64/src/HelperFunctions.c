@@ -359,7 +359,7 @@ int isFull(BF_Block *block){
 	int recs =0;
 	char * data = BF_Block_GetData(block);
 	memmove(&recs, data, sizeof(int));
-	printf("out block has %d recs\n", recs);
+	//printf("out block has %d recs\n", recs);
 	int avail_space = BF_BLOCK_SIZE - BLOCKBASEOFFSET-(recs+1)*SIZEOFRECORD;
 	if(avail_space < 0) return 1;
 	else return 0;
@@ -369,10 +369,10 @@ int isFinished(BF_Block *block, int offset){
 	char * data = BF_Block_GetData(block);
 	int recs =0;
 	memmove(&recs, data, sizeof(int));
-	printf("Recs are %d\n", recs);
+	//printf("Recs are %d\n", recs);
 	fflush(stdout);
 	int past = offset - (recs*SIZEOFRECORD)- BLOCKBASEOFFSET;
-	printf("past is %d\n", past);
+	//printf("past is %d\n", past);
 	if(past >= 0) return 1;
 	else return 0;
 }
@@ -424,9 +424,9 @@ void SortAndStoreRuns(Run** runArray, int size, int fieldNo, int out_fileDesc){
 	//heap theheap;
 	//makeheap(blockArray, size-1, fieldNo, &theheap);
 	//while(theheap.size >0){
-	for(int i=0; i<size; i++){
-		printf("array[%d] has size %d\n", i, runArray[i]->size);
-	}
+	//for(int i=0; i<size; i++){
+		//printf("array[%d] has size %d\n", i, runArray[i]->size);
+	//}
 	fflush(stdout);
 
 	while(!end){
@@ -437,7 +437,7 @@ void SortAndStoreRuns(Run** runArray, int size, int fieldNo, int out_fileDesc){
 		while(min <size){
 			if(runArray[min]->size){
 				if(isFinished(runArray[min]->pinnedBlock, offsets[min])){
-					printf("Is finished22!, min %d\n", min);
+					//printf("Is finished22!, min %d\n", min);
 					fflush(stdout);
 					Run_NextBlock(runArray[min]);
 					offsets[min] = BLOCKBASEOFFSET;
@@ -470,10 +470,10 @@ void SortAndStoreRuns(Run** runArray, int size, int fieldNo, int out_fileDesc){
 				continue;
 			}
 			else{
-				printf("offsets[i]: %d\n", offsets[i]);
+				//printf("offsets[i]: %d\n", offsets[i]);
 				//check here if block is at end
-				printf("min is %d, i is %d, size is %d,runArray[i]->size is %d\n", min, i, size, runArray[i]->size);
-				printf("pinned block id is %d\n", runArray[i]->pinnedBlock_id);
+				//printf("min is %d, i is %d, size is %d,runArray[i]->size is %d\n", min, i, size, runArray[i]->size);
+				//printf("pinned block id is %d\n", runArray[i]->pinnedBlock_id);
 				if(isFinished(runArray[i]->pinnedBlock, offsets[i])){
 					//printf("Is finished!\n");
 					//fflush(stdout);
@@ -496,10 +496,10 @@ void SortAndStoreRuns(Run** runArray, int size, int fieldNo, int out_fileDesc){
 
 		target = BF_Block_GetData(outBlock);
 		//move the record to the sorted buffer and increment offsets
-		printf("Of[m] %d, min %d size %d\n", offsets[min], min, size);
-		printf("runArray[min]->size %d\n", runArray[min]->size);
+		//printf("Of[m] %d, min %d size %d\n", offsets[min], min, size);
+		//printf("runArray[min]->size %d\n", runArray[min]->size);
 		fflush(stdout);
-		printf("%d %s %s %s\n", minRec->id, minRec->name, minRec->surname, minRec->city);
+		//printf("%d %s %s %s\n", minRec->id, minRec->name, minRec->surname, minRec->city);
 		fflush(stdout);
 		memmove(target+offsets[size], minRec, SIZEOFRECORD);
 		offsets[min] += SIZEOFRECORD;
@@ -523,11 +523,11 @@ void SortAndStoreRuns(Run** runArray, int size, int fieldNo, int out_fileDesc){
 		//else{
 				//theheap.size--;
 		//}
-	printf("Bye bye cruel world!, fullct =%d\n",fullct);
+	//printf("Bye bye cruel world!, fullct =%d\n",fullct);
 	fflush(stdout);
-	for(int i=0; i<size; i++){
-		printf("array[%d] has size %d\n", i, runArray[i]->size);
-	}
+	//for(int i=0; i<size; i++){
+		//printf("array[%d] has size %d\n", i, runArray[i]->size);
+	//}
 	fflush(stdout);
 	//cleanup
 	//destroyheap(&theheap);
