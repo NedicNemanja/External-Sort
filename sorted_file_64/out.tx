@@ -30112,7 +30112,7 @@ Is finished22!, min 0
 Bye bye cruel world!
 array[0] has size 0
 infile:tempSortFile outfile:outFile1
-Outfile after iteration:1 New run_size:6,lastRunSize:3
+Outfile after iteration1: blockcount:186 New run_size:6,lastRunSize:3
 ---------------------------------------------
 runs_in_file:27,groups_in_file:14
 CREATING RUN WITH 1block:1,run_size:6--------
@@ -49293,7 +49293,7 @@ Is finished22!, min 0
 Bye bye cruel world!
 array[0] has size 0
 infile:outFile1 outfile:outFile2
-Outfile after iteration:2 New run_size:12,lastRunSize:3
+Outfile after iteration2: blockcount:152 New run_size:12,lastRunSize:3
 ---------------------------------------------
 runs_in_file:14,groups_in_file:7
 CREATING RUN WITH 1block:1,run_size:12--------

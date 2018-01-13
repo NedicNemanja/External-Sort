@@ -360,7 +360,9 @@ fflush(stdout);
     //runs have been merged in groups, the new run is a whole group
     run_size = run_size*(bufferSize-1);
     lastRunSize = BlockCount%run_size;
-printf("Outfile after iteration:%d New run_size:%d,lastRunSize:%d\n---------------------------------------------\n", iteration,run_size,lastRunSize);
+    int b;
+    BF_GetBlockCounter(in_file,&b);
+printf("Outfile after iteration%d: blockcount:%d New run_size:%d,lastRunSize:%d\n---------------------------------------------\n", iteration,b,run_size,lastRunSize);
 //SR_PrintAllEntries(out_file);
   }
 

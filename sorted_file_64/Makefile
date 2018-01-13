@@ -18,4 +18,4 @@ bf:
 	gcc -I ./include/ -L ./lib/ -Wl,-rpath,./lib/ ./examples/bf_main.c -lbf -o ./build/runner
 
 clean:
-	rm -rf ./build/* ./outFile* ./*.db ./tempSortFile
+	rm -rf ./build/* ./outFile* ./*.db ./tempSortFile ./out.*
