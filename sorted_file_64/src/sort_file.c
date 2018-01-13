@@ -363,9 +363,10 @@ fflush(stdout);
     int b;
     BF_GetBlockCounter(in_file,&b);
 printf("Outfile after iteration%d: blockcount:%d New run_size:%d,lastRunSize:%d\n---------------------------------------------\n", iteration,b,run_size,lastRunSize);
-//SR_PrintAllEntries(out_file);
-  }
 
+  }
+  SR_PrintAllEntries(out_file);
+  fflush(stdout);
   SR_CloseFile(out_file);
   free(pinnedRuns);
   free(pinnedBlocks);

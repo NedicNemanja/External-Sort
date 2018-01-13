@@ -359,6 +359,7 @@ int isFull(BF_Block *block){
 	int recs =0;
 	char * data = BF_Block_GetData(block);
 	memmove(&recs, data, sizeof(int));
+	printf("out block has %d recs\n", recs);
 	int avail_space = BF_BLOCK_SIZE - BLOCKBASEOFFSET-(recs+1)*SIZEOFRECORD;
 	if(avail_space < 0) return 1;
 	else return 0;
@@ -408,6 +409,7 @@ void initBlock(BF_Block *block){
 
 //NEME VALE ENA FILE EDO NA GRAFO
 void SortAndStoreRuns(Run** runArray, int size, int fieldNo, int out_fileDesc){
+	int fullct = 0;
 	int *offsets = NULL, end=0, min, recs;
 	char *target = NULL;
 	BF_Block *outBlock = NULL;
@@ -416,7 +418,7 @@ void SortAndStoreRuns(Run** runArray, int size, int fieldNo, int out_fileDesc){
 	//initialize the first block
 	//BF_AllocateBlock(out_fileDesc, outBlock);
 	//initFirstBlock(outBlock);
-
+	fullct++;
 	BF_AllocateBlock(out_fileDesc, outBlock);
 	initBlock(outBlock);
 	//heap theheap;
@@ -429,15 +431,6 @@ void SortAndStoreRuns(Run** runArray, int size, int fieldNo, int out_fileDesc){
 
 	while(!end){
 		//check if last buffer is full
-		if(isFull(outBlock)){
-			//printf("Block is full\n");
-			//allocate a new one
-			BF_Block_SetDirty(outBlock);
-			BF_UnpinBlock(outBlock);
-			BF_AllocateBlock(out_fileDesc, outBlock);
-			initBlock(outBlock);
-			offsets[size] = BLOCKBASEOFFSET;
-		}
 
 		min = 0;
 		//find a min and if you don't find, break;
@@ -456,6 +449,17 @@ void SortAndStoreRuns(Run** runArray, int size, int fieldNo, int out_fileDesc){
 				break;
 		}
 		if(min >= size) break;
+
+		if(isFull(outBlock)){
+			fullct++;
+			//printf("Block is full\n");
+			//allocate a new one
+			BF_Block_SetDirty(outBlock);
+			BF_UnpinBlock(outBlock);
+			BF_AllocateBlock(out_fileDesc, outBlock);
+			initBlock(outBlock);
+			offsets[size] = BLOCKBASEOFFSET;
+		}
 		//printf("Found min %d, run->size %d, offset: %d\n", min, runArray[min]->size, offsets[min]);
 		Record *minRec = (Record *) (BF_Block_GetData(runArray[min]->pinnedBlock) + offsets[min]);
 		//printf("minRec %d %s %s %s\n", minRec->id, minRec->name, minRec->surname, minRec->city);
@@ -519,7 +523,7 @@ void SortAndStoreRuns(Run** runArray, int size, int fieldNo, int out_fileDesc){
 		//else{
 				//theheap.size--;
 		//}
-	printf("Bye bye cruel world!\n");
+	printf("Bye bye cruel world!, fullct =%d\n",fullct);
 	fflush(stdout);
 	for(int i=0; i<size; i++){
 		printf("array[%d] has size %d\n", i, runArray[i]->size);
