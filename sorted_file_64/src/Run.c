@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <stdio.h>
 #include "Run.h"
 
 Run* Run_init(int fileDesc, int current_block_id, int run_size){
@@ -13,6 +14,8 @@ Run* Run_init(int fileDesc, int current_block_id, int run_size){
 
 void Run_NextBlock(Run* run){
   BF_UnpinBlock(run->pinnedBlock);
+  printf("Size is % d ", run->size);
+  printf("id of prev block is %d ", run->pinnedBlock_id);
   //run ended
   run->size--;
   if(run->size == 0){
@@ -22,6 +25,7 @@ void Run_NextBlock(Run* run){
     run->pinnedBlock_id++;
     BF_GetBlock(run->fileDesc, run->pinnedBlock_id, run->pinnedBlock);
   }
+  printf("id of new block is %d \n", run->pinnedBlock_id);
 }
 
 void Run_destroy(Run* run){
