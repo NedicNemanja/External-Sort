@@ -85,7 +85,7 @@ int SR_DestroyFile(char *fileName) {
   BF_GetBlock(fileDesc, 0, tmpBlock);//Getting the first block
   data = BF_Block_GetData(tmpBlock);//and its data
 
-  if (data == NULL || strcmp(data, "Sort"))//to check if this new opened file is a sort file
+  if (data == NULL || strcmp(data, "sort"))//to check if this new opened file is a sort file
   {
     BF_UnpinBlock(tmpBlock);
     BF_Block_Destroy(&tmpBlock);
@@ -339,7 +339,7 @@ fflush(stdout);
       //Lets sort and store this group of runs
       SortAndStoreRuns(pinnedRuns,group_size,fieldNo,out_file);
       //clean the pinnedRuns array
-      UnpinGroup(pinnedRuns,bufferSize-1);
+      UnpinGroup(pinnedRuns,group_size);
     }
 
     /*Flush and prepare for next iteration*/
