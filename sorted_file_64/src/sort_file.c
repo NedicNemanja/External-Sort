@@ -229,8 +229,8 @@ SR_PrintAllEntries(tempDesc);
   /*initialize pinnedBlocks:  This is where we keep the BF_Block* of the blocks
                               that are currently pinned.*/
   BF_Block** pinnedBlocks = malloc(bufferSize*sizeof(BF_Block*));
-  for(int i=0; i<bufferSize; i++)
-      BF_Block_Init(&pinnedBlocks[i]);
+  //for(int i=0; i<bufferSize; i++)
+      //BF_Block_Init(&pinnedBlocks[i]);
 
   //initialize some counters
   int BlockCount, iteratedBlocks = 0, bb=0;
