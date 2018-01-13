@@ -282,7 +282,10 @@ int isFinished(BF_Block *block, int offset){
 	char * data = BF_Block_GetData(block);
 	int recs =0;
 	memmove(&recs, data, sizeof(int));
+	printf("Recs are %d\n", recs);
+	fflush(stdout);
 	int past = offset - (recs*SIZEOFRECORD)- BLOCKBASEOFFSET;
+	printf("past is %d\n", past);
 	if(past >= 0) return 1;
 	else return 0;
 }
@@ -343,6 +346,10 @@ void SortAndStoreRuns(Run** runArray, int size, int fieldNo, int out_fileDesc){
 	//heap theheap;
 	//makeheap(blockArray, size-1, fieldNo, &theheap);
 	//while(theheap.size >0){
+	for(int i=0; i<size; i++){
+		printf("array[%d] has size %d\n", i, runArray[i]->size);
+	}
+	fflush(stdout);
 
 	while(!end){
 		//check if last buffer is full
@@ -361,7 +368,7 @@ void SortAndStoreRuns(Run** runArray, int size, int fieldNo, int out_fileDesc){
 		while(min <size){
 			if(runArray[min]->size){
 				if(isFinished(runArray[min]->pinnedBlock, offsets[min])){
-					//printf("Is finished22!, min %d\n", min);
+					printf("Is finished22!, min %d\n", min);
 					fflush(stdout);
 					Run_NextBlock(runArray[min]);
 					offsets[min] = BLOCKBASEOFFSET;
@@ -378,16 +385,17 @@ void SortAndStoreRuns(Run** runArray, int size, int fieldNo, int out_fileDesc){
 		//printf("minRec %d %s %s %s\n", minRec->id, minRec->name, minRec->surname, minRec->city);
 		for(int i=min+1; i<size; i++){
 			//printf("NE\n");
-			fflush(stdout);
+			//fflush(stdout);
 			if(!runArray[i]->size){
 				continue;
 			}
 			else{
-				//printf("offsets[i]: %d\n", offsets[i]);
+				printf("offsets[i]: %d\n", offsets[i]);
 				//check here if block is at end
+				printf("i is %d, size is %d, Run is %d\n", i, size, runArray[i]->size);
 				if(isFinished(runArray[i]->pinnedBlock, offsets[i])){
 					//printf("Is finished!\n");
-					fflush(stdout);
+					//fflush(stdout);
 					Run_NextBlock(runArray[i]);
 					offsets[i] = BLOCKBASEOFFSET;
 				}
@@ -435,6 +443,10 @@ void SortAndStoreRuns(Run** runArray, int size, int fieldNo, int out_fileDesc){
 				//theheap.size--;
 		//}
 	printf("Bye bye cruel world!\n");
+	fflush(stdout);
+	for(int i=0; i<size; i++){
+		printf("array[%d] has size %d\n", i, runArray[i]->size);
+	}
 	fflush(stdout);
 	//cleanup
 	//destroyheap(&theheap);

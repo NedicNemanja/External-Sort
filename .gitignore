@@ -1,2 +1,5 @@
 /Askisi_3.pdf
 /sorted_file_64/build/*
+/sorted_file_64/outFile*
+/sorted_file_64/*.db
+/sorted_file_64/tempSortFile
