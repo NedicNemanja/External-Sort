@@ -619,8 +619,6 @@ int PinGroup(Run** pinnedRuns,int in_file,int* current_block_id,int run_size,
 			}
 			//if this is the last run
 			else{
-				*current_block_id -= run_size;
-				*current_block_id += lastRunSize;
 				pinnedRuns[buffer_index] = Run_init(in_file,*current_block_id,lastRunSize);
 				group_size++;
 				*num_of_unmerged_blocks -= lastRunSize;
