@@ -24,24 +24,17 @@
 attribute selected by fieldNo.
 No more blocks should be allocated.
 Just the records should be moved around until the array is sorted.
-After this function StoreRun should be called to store the sorted run back to
-the disk.*/
+*/
 void QuickSortRun(BF_Block** blockArray, int size, int fieldNo, Index low, Index high);
+
+void quickSort(BF_Block** blockArray, int size, int fieldNo, int lastRun, int lastRunSize);
 
 /*Sorts blockArray[size] base on the selected fieldNo of the record*/
 void SortAndStoreRuns(Run** pinnedRuns,int num_of_runs,int fieldNo,int out_file);
 
-/*store all the runs from pinnedBlocks to fileDesc,
-also unpins all blocks from pinnedBlocks*/
-void StoreRun(int fileDesc,BF_Block** pinnedBlocks,int run_size);
-
-/*insert a whole block into the described file*/
-void InsertBlock(int fileDesc, BF_Block* block);
-
 //copy the file with name inputFileName to a new file it creates, the outputFileName, returns the fd of the output file
 int CopyFile(int fileDesc1, int fileDesc2);
 
-void quickSort(BF_Block** blockArray, int size, int fieldNo, int lastRun, int lastRunSize);
 
 //load a group of runs to the buffer
 int PinGroup(Run** pinnedRuns,int in_file,int* current_block_id,int run_size,
