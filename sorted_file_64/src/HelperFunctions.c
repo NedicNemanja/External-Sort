@@ -31,6 +31,7 @@ Index indexDecr(Index index){
 //function to inrease an index struct of our quicksort
 Index indexIncr(Index index, int size){
 	//calculate the index number of the last record ([0..n-1])
+	//AUTO EINAI LATHOS
 	int lastRecordIndex = (BF_BLOCK_SIZE - BLOCKBASEOFFSET) / SIZEOFRECORD - 1;
 	//if the index to increase is the last record of a block
 	if (index.recordIndex == lastRecordIndex){	//and the block is the last block
@@ -253,19 +254,19 @@ void quickSort(BF_Block** blockArray, int size, int fieldNo, int lastRun, int la
 	low.blockIndex = 0;
 	low.recordIndex = 0;
 
-	if (lastRun)
-	{
+	if(lastRun){
 		high.blockIndex = lastRunSize - 1;
 
 		data = BF_Block_GetData(blockArray[lastRunSize-1]);
 		memmove(&(high.recordIndex), data, sizeof(int));
 		high.recordIndex--;
-	}else{
+	}
+	else{
 		high.blockIndex = size - 1;
 		high.recordIndex = (BF_BLOCK_SIZE - BLOCKBASEOFFSET) / SIZEOFRECORD - 1;
 	}
 
-	QuickSortRun(blockArray,size,fieldNo, low, high);
+	QuickSortRun(blockArray, size ,fieldNo, low, high);
 }
 
 int isFull(BF_Block *block){
