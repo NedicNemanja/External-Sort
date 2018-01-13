@@ -246,7 +246,6 @@ printf("---------------BLOCKCOUNT %d-------------\n", BlockCount);
         BF_GetBlock(tempDesc, iteratedBlocks, pinnedBlocks[i]);
         iteratedBlocks++;
       }
-
       //sort the run
       quickSort(pinnedBlocks, bufferSize, fieldNo, 0, lastRunSize);
       //store the sorted run back to the temp_file
@@ -257,7 +256,6 @@ printf("---------------BLOCKCOUNT %d-------------\n", BlockCount);
         //pinnedBlocks[i] = NULL;
       }
   }
-
   for(int i=0; i<lastRunSize; i++)
       BF_Block_Init(&pinnedBlocks[i]);
   //***do the last run as well***
@@ -282,7 +280,6 @@ printf("---------------BLOCKCOUNT %d-------------\n", BlockCount);
   /*for(int i=0; i<bufferSize; i++){
     BF_Block_Destroy(&pinnedBlocks[i]);
   }*/
-
 /******************************************************************************
 **************merge the runs and store them in the output_filename*************
 ******************************************************************************/
