@@ -468,7 +468,8 @@ void SortAndStoreRuns(Run** runArray, int size, int fieldNo, int out_fileDesc){
 			else{
 				printf("offsets[i]: %d\n", offsets[i]);
 				//check here if block is at end
-				printf("i is %d, size is %d, Run is %d\n", i, size, runArray[i]->size);
+				printf("min is %d, i is %d, size is %d,runArray[i]->size is %d\n", min, i, size, runArray[i]->size);
+				printf("pinned block id is %d\n", runArray[i]->pinnedBlock_id);
 				if(isFinished(runArray[i]->pinnedBlock, offsets[i])){
 					//printf("Is finished!\n");
 					//fflush(stdout);
