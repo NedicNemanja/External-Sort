@@ -298,7 +298,7 @@ SR_PrintAllEntries(tempDesc);
 ******************************************************************************/
   int run_size = bufferSize;
   BlockCount--; //minus the metadata block
-  //arithmetics to determine how many iterations we'll need to sort the file
+  //quick mafs to determine how many iterations we'll need to sort the file
   int m = ceil( (double)BlockCount/(double)bufferSize );
   unsigned int iterations = ceil( (double)log(m)/(double)log(bufferSize-1) );
 
