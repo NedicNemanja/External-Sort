@@ -326,7 +326,6 @@ fflush(stdout);
     //number of run-groups
     int groups_in_file = (int)ceil((double)runs_in_file/(double)(bufferSize-1));
 printf("runs_in_file:%d,groups_in_file:%d\n", runs_in_file,groups_in_file);
-printf("run_size:%d,lastRunSize:%d\n", run_size,lastRunSize);
 fflush(stdout);
     /*load,sort,store all the groups one by one*/
     for(int g=0; g<groups_in_file; g++){
@@ -361,7 +360,7 @@ fflush(stdout);
     //runs have been merged in groups, the new run is a whole group
     run_size = run_size*(bufferSize-1);
     lastRunSize = BlockCount%run_size;
-printf("Outfile after iteration:%d---------------------------------------------\n", iteration);
+printf("Outfile after iteration:%d New run_size:%d,lastRunSize:%d\n---------------------------------------------\n", iteration,run_size,lastRunSize);
 //SR_PrintAllEntries(out_file);
   }
 
