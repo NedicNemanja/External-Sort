@@ -346,8 +346,10 @@ fflush(stdout);
     printf("infile:%s outfile:%s\n", in_filename,out_filename);
     strcpy(in_filename,out_filename);
     /*The last iteration must be written to the out_file*/
-    if(iteration+1 == iterations) //if the next iteration is the last iteration
+    if(iteration+1 == iterations){ //if the next iteration is the last iteration
       SR_OpenFile(output_filename,&out_file);
+      strcpy(out_filename, output_filename);
+    }
     //create a new out_file named "outFile*here_goes_iteration_number*"
     else{
       strcpy(out_filename,"outFile");
