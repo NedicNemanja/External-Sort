@@ -347,6 +347,7 @@ fflush(stdout);
     strcpy(in_filename,out_filename);
     /*The last iteration must be written to the out_file*/
     if(iteration+1 == iterations){ //if the next iteration is the last iteration
+      SR_CreateFile(out_filename);
       SR_OpenFile(output_filename,&out_file);
       strcpy(out_filename,output_filename);
     }
