@@ -4,7 +4,7 @@
 #include "structs.h"
 
 //function to decrease an index struct of our quicksort
-Index indexDecr(Index index){
+Index indexDecr(Index index, BF_Block** blockArray){
 	//if its the first record of this block
 	if (index.recordIndex == 0){
 		/*if (index.blockIndex == 0)
@@ -19,7 +19,14 @@ Index indexDecr(Index index){
 		}*/
 		//Set the block index to the previous one and the record index to the last of the previous block
 		int lastRecordIndex = (BF_BLOCK_SIZE - BLOCKBASEOFFSET) / SIZEOFRECORD - 1;
+		char *data;
 		index.blockIndex--;
+		if (index.blockIndex >= 0)
+		{
+			data = BF_Block_GetData(blockArray[index.blockIndex]);
+			memmove(&lastRecordIndex, data, sizeof(int));
+			lastRecordIndex--;
+		}
 		index.recordIndex = lastRecordIndex;
 	}
   else{
@@ -29,25 +36,36 @@ Index indexDecr(Index index){
 	return index;
 }
 //function to inrease an index struct of our quicksort
-Index indexIncr(Index index, int size){
+Index indexIncr(Index index, int size, BF_Block** blockArray){
+	printf("PRIN TO INCRRRR %dn %dr\n", index.blockIndex, index.recordIndex);
 	//calculate the index number of the last record ([0..n-1])
 	//AUTO EINAI LATHOS
-	int lastRecordIndex = (BF_BLOCK_SIZE - BLOCKBASEOFFSET) / SIZEOFRECORD - 1;
+	//int lastRecordIndex = (BF_BLOCK_SIZE - BLOCKBASEOFFSET) / SIZEOFRECORD - 1;
 	//if the index to increase is the last record of a block
-	if (index.recordIndex == lastRecordIndex){	//and the block is the last block
-		/*if (index.blockIndex == size - 1){//then we cannot increase it without getting out of borders
-			//printf("Error in Quicksort's index increase %d %d.\n", index.blockIndex, index.recordIndex);
-			exit(-1);
-		}
-    else{//else set the block to the next and the record to the first of the next
-			index.blockIndex++;
-			index.recordIndex = 0;
-		}*/
+	if(index.blockIndex == -1){
 		index.blockIndex++;
 		index.recordIndex = 0;
-	}
-  else{//else if its just a random record set it to the next
-		index.recordIndex++;
+
+	}else{
+		int lastRecordIndex;
+		char *data;
+		data = BF_Block_GetData(blockArray[index.blockIndex]);
+		memmove(&lastRecordIndex, data, sizeof(int));
+		lastRecordIndex--;
+		if (index.recordIndex == lastRecordIndex){	//and the block is the last block
+				/*if (index.blockIndex == size - 1){//then we cannot increase it without getting out of borders
+					//printf("Error in Quicksort's index increase %d %d.\n", index.blockIndex, index.recordIndex);
+					exit(-1);
+				}
+		    else{//else set the block to the next and the record to the first of the next
+					index.blockIndex++;
+					index.recordIndex = 0;
+				}*/
+				index.blockIndex++;
+				index.recordIndex = 0;
+		}else{//else if its just a random record set it to the next
+				index.recordIndex++;
+		}
 	}
 	return index;
 }
@@ -59,6 +77,7 @@ Record getRecordFromBlock(BF_Block** blockArray, int size, int requestedBlock, i
 		printf("Error in Quicksort's getRecordFromBlock - requestedBlock doesnt exist.\n");
 		exit(-1);
 	}
+	printf("KANW GET TO %db %de\n", requestedBlock, requestedRecord);
 
 	Record tmpRecord;
 	char * data = NULL;
@@ -95,12 +114,18 @@ void setRecord(BF_Block** blockArray, int targetBlock, int targetRecord, Record 
 int recordLessEqualThan(Record tmpRecord, Record pivot, int fieldNo){
 	switch (fieldNo){
 		case 0:
-			if (tmpRecord.id <= pivot.id)
+			if (tmpRecord.id <= pivot.id){
+				printf("#####TO %d EINAI MIKROTEROISO TOU %d\n", tmpRecord.id, pivot.id);
 				return 1;
+			}
+			printf("#####TO %d DEN EINAI MIKROTEROISO TOU %d--------------\n", tmpRecord.id, pivot.id);
 			return 0;
 		case 1:
-			if (strcmp(tmpRecord.name, pivot.name) <= 0)
+			if (strcmp(tmpRecord.name, pivot.name) <= 0){
+				printf("#####TO %s EINAI MIKROTEROISO TOU %s\n", tmpRecord.name, pivot.name);
 				return 1;
+			}
+			printf("#####TO %s DEN EINAI MIKROTEROISO TOU %s--------------\n", tmpRecord.name, pivot.name);
 			return 0;
 		case 2:
 			if (strcmp(tmpRecord.surname, pivot.surname) <= 0)
@@ -151,12 +176,15 @@ Index partition(BF_Block** blockArray, int size, int fieldNo, Index low, Index h
 	printf("MPIKA me apo %db %dr ews %db %dr\n", low.blockIndex, low.recordIndex, high.blockIndex, high.recordIndex);
 
 	Record pivot = getRecordFromBlock(blockArray, size, high.blockIndex, high.recordIndex);
-	Index i = indexDecr(low);
+	Index i = indexDecr(low, blockArray);
+	//printf("TO PRWTO EINAI %db %dr\n", i.blockIndex, i.recordIndex);
 	int numRecs = (BF_BLOCK_SIZE - BLOCKBASEOFFSET) / SIZEOFRECORD;
 	//Iterate through all records from low to high
 
 	for (b = low.blockIndex; b <= high.blockIndex; b++){
+		printf("NEO BLOCK\n");
 		if(b == low.blockIndex && b == high.blockIndex){
+			printf("1\n");
 			for (r = low.recordIndex; r <= high.recordIndex; r++){
 	    		if (b == high.blockIndex && r > (high.recordIndex - 1))
 	    		{
@@ -166,7 +194,7 @@ Index partition(BF_Block** blockArray, int size, int fieldNo, Index low, Index h
 					//if the current record is smaller or equal to pivot
 				if (recordLessEqualThan(tmpRec, pivot, fieldNo)){
 					//printf("1\n");
-					i = indexIncr(i, size);
+					i = indexIncr(i, size, blockArray);
 					Index j;
 					j.blockIndex = b;
 					j.recordIndex = r;
@@ -175,13 +203,14 @@ Index partition(BF_Block** blockArray, int size, int fieldNo, Index low, Index h
 				}
 			}
 		}else if(b == low.blockIndex){
+			printf("2\n");
 			for (r = low.recordIndex; r <= numRecs - 1; r++){
-
+				//printf("HERE\n");
 	      		Record tmpRec = getRecordFromBlock(blockArray, size, b, r);
 					//if the current record is smaller or equal to pivot
 				if (recordLessEqualThan(tmpRec, pivot, fieldNo)){
 					//printf("1\n");
-					i = indexIncr(i, size);
+					i = indexIncr(i, size, blockArray);
 					Index j;
 					j.blockIndex = b;
 					j.recordIndex = r;
@@ -189,18 +218,19 @@ Index partition(BF_Block** blockArray, int size, int fieldNo, Index low, Index h
 					recordSwap(blockArray, size, i, j);
 				}
 			}
-		}
-		else if (b == high.blockIndex){
-			for (r = low.recordIndex; r <= high.recordIndex; r++){
-				if (b == high.blockIndex && r > (high.recordIndex - 1)){
+		}else if (b == high.blockIndex)
+		{printf("3\n");
+			for (r = 0; r <= high.recordIndex; r++){
+				if (b == high.blockIndex && r > (high.recordIndex - 1))
+	    		{
 	    			break;
-	    	}
+	    		}
 
 	      		Record tmpRec = getRecordFromBlock(blockArray, size, b, r);
 					//if the current record is smaller or equal to pivot
 				if (recordLessEqualThan(tmpRec, pivot, fieldNo)){
 					//printf("1\n");
-					i = indexIncr(i, size);
+					i = indexIncr(i, size, blockArray);
 					Index j;
 					j.blockIndex = b;
 					j.recordIndex = r;
@@ -208,15 +238,14 @@ Index partition(BF_Block** blockArray, int size, int fieldNo, Index low, Index h
 					recordSwap(blockArray, size, i, j);
 				}
 			}
-		}
-		else{
+		}else{
+			printf("4\n");
 			for (r = 0; r <= numRecs - 1; r++){
-
 	      		Record tmpRec = getRecordFromBlock(blockArray, size, b, r);
 					//if the current record is smaller or equal to pivot
 				if (recordLessEqualThan(tmpRec, pivot, fieldNo)){
 					//printf("1\n");
-					i = indexIncr(i, size);
+					i = indexIncr(i, size, blockArray);
 					Index j;
 					j.blockIndex = b;
 					j.recordIndex = r;
@@ -227,23 +256,55 @@ Index partition(BF_Block** blockArray, int size, int fieldNo, Index low, Index h
 		}
 	}
 	//printf("2\n");
-	i = indexIncr(i, size);
+	i = indexIncr(i, size, blockArray);
 	recordSwap(blockArray, size, i, high);
 	return i;
 }
 //LOW IS 0 HIGH IS MAX - 1
 void QuickSortRun(BF_Block** blockArray, int size, int fieldNo, Index low, Index high){
 
-	if (low.blockIndex <= high.blockIndex && low.recordIndex < high.recordIndex){
-		//partition the array with part as seperator, after this the blockArray[part] is in the correct sorted position
-		Index part = partition(blockArray, size, fieldNo, low, high);
+	if (low.blockIndex <= high.blockIndex && low.recordIndex <= high.recordIndex){
+		if (!(low.blockIndex == high.blockIndex && low.recordIndex == high.recordIndex))
+		{
+			//partition the array with part as seperator, after this the blockArray[part] is in the correct sorted position
+			Index part = partition(blockArray, size, fieldNo, low, high);
+			printf("PART PRIN %db %dr\n", part.blockIndex, part.recordIndex);
 
-		Index decreasedPart = indexDecr(part);
-		//printf("3\n");
-		Index increasedPart = indexIncr(part, size);
-		//now sort in the same way the elements in the left of part and to the right of part
-		QuickSortRun(blockArray, size, fieldNo, low, decreasedPart);
-		QuickSortRun(blockArray, size, fieldNo, increasedPart, high);
+			Index decreasedPart = indexDecr(part, blockArray);
+			printf("PART META %db %dr\n", decreasedPart.blockIndex, decreasedPart.recordIndex);
+			//printf("3\n");
+			Index increasedPart = indexIncr(part, size, blockArray);
+			//now sort in the same way the elements in the left of part and to the right of part
+			printf("MPAINW DECR\n");
+			QuickSortRun(blockArray, size, fieldNo, low, decreasedPart);
+			printf("MPAINW INCR\n");
+			QuickSortRun(blockArray, size, fieldNo, increasedPart, high);
+		}
+	}
+}
+
+void printBlockArray(BF_Block** blockArray, int size){
+	char *data = NULL;
+	Record tmpRec;
+	int numRecs;
+	for (int i = 0; i < size; ++i)
+	{
+		data = BF_Block_GetData(blockArray[i]);
+		memmove(&numRecs, data, sizeof(int));
+		int offset = BLOCKBASEOFFSET;
+		for (int j = 0; j < numRecs; ++j)
+		{
+			memmove(&(tmpRec.id), data + offset, SIZEOFID);
+			offset+=SIZEOFID;
+			memmove(&(tmpRec.name), data + offset, SIZEOFNAME);
+			offset+=SIZEOFNAME;
+			memmove(&(tmpRec.surname), data + offset, SIZEOFSURNAME);
+			offset+=SIZEOFSURNAME;
+			memmove(&(tmpRec.city), data + offset, SIZEOFCITY);
+			offset+=SIZEOFCITY;
+			printf("%d %s %s %s\n", tmpRec.id, tmpRec.name, tmpRec.surname, tmpRec.city);
+		}
+		printf("\n");
 	}
 }
 
@@ -255,15 +316,25 @@ void quickSort(BF_Block** blockArray, int size, int fieldNo, int lastRun, int la
 	low.recordIndex = 0;
 
 	if(lastRun){
+		printBlockArray(blockArray, lastRunSize);
 		high.blockIndex = lastRunSize - 1;
 
 		data = BF_Block_GetData(blockArray[lastRunSize-1]);
+		if (data == NULL)
+		{
+			printf("TSAPRRRR\n");
+		}
 		memmove(&(high.recordIndex), data, sizeof(int));
 		high.recordIndex--;
 	}
 	else{
+		printBlockArray(blockArray, size);
 		high.blockIndex = size - 1;
-		high.recordIndex = (BF_BLOCK_SIZE - BLOCKBASEOFFSET) / SIZEOFRECORD - 1;
+		data = BF_Block_GetData(blockArray[(size - 1)]);
+		memmove(&(high.recordIndex), data, sizeof(int));
+		high.recordIndex--;
+		//high.recordIndex = (BF_BLOCK_SIZE - BLOCKBASEOFFSET) / SIZEOFRECORD - 1;
+		printf("ARA EXW %d block %d records\n", high.blockIndex + 1, high.recordIndex + 1);
 	}
 
 	QuickSortRun(blockArray, size ,fieldNo, low, high);
