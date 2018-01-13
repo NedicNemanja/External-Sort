@@ -357,13 +357,25 @@ void SortAndStoreRuns(Run** runArray, int size, int fieldNo, int out_fileDesc){
 
 		min = 0;
 		//find a min and if you don't find, break;
-		while(min <size && !runArray[min]->size)
-			min++;
+		while(min <size){
+			if(runArray[min]->size){
+				if(isFinished(runArray[min]->pinnedBlock, offsets[min])){
+					printf("Is finished22!\n");
+					fflush(stdout);
+					Run_NextBlock(runArray[min]);
+					offsets[min] = BLOCKBASEOFFSET;
+				}
+			}
+			if(!runArray[min]->size)
+				min++;
+			else
+				break;
+		}
 		if(min >= size) break;
 		printf("Found min %d, run->size %d, offset: %d\n", min, runArray[min]->size, offsets[min]);
 		Record *minRec = (Record *) (BF_Block_GetData(runArray[min]->pinnedBlock) + offsets[min]);
 		//printf("minRec %d %s %s %s\n", minRec->id, minRec->name, minRec->surname, minRec->city);
-		for(int i=min; i<size; i++){
+		for(int i=min+1; i<size; i++){
 			if(!runArray[i]->size){
 				continue;
 			}
