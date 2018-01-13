@@ -409,13 +409,13 @@ SR_ErrorCode SR_PrintAllEntries(int fileDesc) {
     for(int j=0; j< recs; j++){
       //print id
       memmove(&id, data+offset, id_size);
-      printf("%d\n", id);
+      printf("%d ", id);
       offset += id_size;
       //print name
-      printf("%s\n", data+offset);
+      printf("%s ", data+offset);
       offset += name_size;
       //print surname
-      printf("%s\n", data+offset);
+      printf("%s ", data+offset);
       offset += sur_size;
       //print city
       printf("%s\n", data+offset);
