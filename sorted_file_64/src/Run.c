@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <stdio.h>
 #include "Run.h"
 
 Run* Run_init(int fileDesc, int current_block_id, int run_size){
@@ -8,6 +9,7 @@ Run* Run_init(int fileDesc, int current_block_id, int run_size){
   run->size = run_size;
   run->pinnedBlock_id = current_block_id;
   run->fileDesc = fileDesc;
+printf("CREATING RUN WITH 1block:%d,run_size:%d--------\n", current_block_id,run_size);
   return run;
 }
 
