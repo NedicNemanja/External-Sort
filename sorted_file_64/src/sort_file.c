@@ -366,6 +366,8 @@ SR_PrintAllEntries(out_file);
   }
 
   SR_CloseFile(out_file);
+  free(pinnedRuns);
+  free(pinnedBlocks);
   return SR_OK;
 }
 

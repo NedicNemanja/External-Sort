@@ -373,10 +373,12 @@ void SortAndStoreRuns(Run** runArray, int size, int fieldNo, int out_fileDesc){
 				break;
 		}
 		if(min >= size) break;
-		printf("Found min %d, run->size %d, offset: %d\n", min, runArray[min]->size, offsets[min]);
+		//printf("Found min %d, run->size %d, offset: %d\n", min, runArray[min]->size, offsets[min]);
 		Record *minRec = (Record *) (BF_Block_GetData(runArray[min]->pinnedBlock) + offsets[min]);
 		//printf("minRec %d %s %s %s\n", minRec->id, minRec->name, minRec->surname, minRec->city);
 		for(int i=min+1; i<size; i++){
+			printf("NE\n");
+			fflush(stdout);
 			if(!runArray[i]->size){
 				continue;
 			}
@@ -391,9 +393,9 @@ void SortAndStoreRuns(Run** runArray, int size, int fieldNo, int out_fileDesc){
 				}
 				if(runArray[i]->size){
 					Record *tRec = (Record *) (BF_Block_GetData(runArray[i]->pinnedBlock) + offsets[i]);
-					printf("tRec %d %s %s %s\n", tRec->id, tRec->name, tRec->surname, tRec->city);
+					//printf("tRec %d %s %s %s\n", tRec->id, tRec->name, tRec->surname, tRec->city);
 					fflush(stdout);
-					printf("offsets[min]: %d, offsets[i]: %d, offsets[size]: %d\n", offsets[min], offsets[i], offsets[size]);
+					//printf("offsets[min]: %d, offsets[i]: %d, offsets[size]: %d\n", offsets[min], offsets[i], offsets[size]);
 					fflush(stdout);
 					if(recordLessThan(tRec, minRec, fieldNo)){
 						min = i;
@@ -431,7 +433,8 @@ void SortAndStoreRuns(Run** runArray, int size, int fieldNo, int out_fileDesc){
 		//else{
 				//theheap.size--;
 		//}
-
+	printf("Bye bye!\n");
+	fflush(stdout);
 	//cleanup
 	//destroyheap(&theheap);
 	BF_Block_SetDirty(outBlock);
