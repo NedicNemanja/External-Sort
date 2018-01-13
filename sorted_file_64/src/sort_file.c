@@ -264,7 +264,6 @@ SR_ErrorCode SR_SortedFile(
     iteratedBlocks++;
   }
   //sort the last run
-  printf("LastRunSize %d\n", lastRunSize);
   if(lastRunSize)
     quickSort(pinnedBlocks, bufferSize, fieldNo, 1, lastRunSize);
   //store it
