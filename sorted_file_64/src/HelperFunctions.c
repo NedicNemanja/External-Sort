@@ -342,13 +342,8 @@ void SortAndStoreRuns(Run** runArray, int size, int fieldNo, int out_fileDesc){
 
 	BF_AllocateBlock(out_fileDesc, outBlock);
 	initBlock(outBlock);
-	//heap theheap;
-	//makeheap(blockArray, size-1, fieldNo, &theheap);
-	//while(theheap.size >0){
 
 	while(!end){
-		//check if last buffer is full
-
 		min = 0;
 		//find a min and if you don't find, break;
 		while(min <size){
@@ -363,8 +358,8 @@ void SortAndStoreRuns(Run** runArray, int size, int fieldNo, int out_fileDesc){
 			else
 				break;
 		}
-		if(min >= size) break;
-
+		if(min >= size) break; //condition to stop the whole process
+		//check if last buffer is full
 		if(isFull(outBlock)){
 			//allocate a new one
 			BF_Block_SetDirty(outBlock);
@@ -404,22 +399,7 @@ void SortAndStoreRuns(Run** runArray, int size, int fieldNo, int out_fileDesc){
 		recs++;
 		memmove(target, &recs, sizeof(int));
 	}
-
-		//THIS IS HEAPSORT
-		//writeroot
-		//swap(theheap, 0, theheap.size-1);
-		//insert from index = theheap.nodes[theheap.size-1].i
-		//if(has_record(blockArray[index]){
-			//insert next to heap
-		//}
-		//else if(next_block){
-			//bring next from run and insert to heap
-		//}
-		//else{
-				//theheap.size--;
-		//}
 	//cleanup
-	//destroyheap(&theheap);
 	BF_Block_SetDirty(outBlock);
 	BF_UnpinBlock(outBlock);
 	BF_Block_Destroy(&outBlock);
