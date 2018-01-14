@@ -34,16 +34,6 @@ void printBlockArray(BF_Block** blockArray, int size){
 Index indexDecr(Index index, BF_Block** blockArray){
 	//if its the first record of this block
 	if (index.recordIndex == 0){
-		/*if (index.blockIndex == 0)
-		{
-			printf("Error in Quicksort's index decrease.\n");
-			exit(-1);
-		}else{
-			lastRecordIndex = (BF_BLOCK_SIZE - BLOCKBASEOFFSET) / SIZEOFRECORD
-
-			index.blockIndex--;
-			index.recordIndex = lastRecordIndex;
-		}*/
 		//Set the block index to the previous one and the record index to the last of the previous block
 		int lastRecordIndex = (BF_BLOCK_SIZE - BLOCKBASEOFFSET) / SIZEOFRECORD - 1;
 		char *data;
@@ -77,14 +67,6 @@ Index indexIncr(Index index, int size, BF_Block** blockArray){
 		memmove(&lastRecordIndex, data, sizeof(int));
 		lastRecordIndex--;
 		if (index.recordIndex == lastRecordIndex){	//and the block is the last block
-				/*if (index.blockIndex == size - 1){//then we cannot increase it without getting out of borders
-					//printf("Error in Quicksort's index increase %d %d.\n", index.blockIndex, index.recordIndex);
-					exit(-1);
-				}
-		    else{//else set the block to the next and the record to the first of the next
-					index.blockIndex++;
-					index.recordIndex = 0;
-				}*/
 				index.blockIndex++;
 				index.recordIndex = 0;
 		}else{//else if its just a random record set it to the next
@@ -177,7 +159,6 @@ int recordLessThan(Record *tmpRecord, Record *pivot, int fieldNo){
 //function to swap the values of the record with index i with the record with index j
 void recordSwap(BF_Block** blockArray, int size, Index i, Index j){
 	//get the two records in two temp variables
-
 	Record tmpReci = getRecordFromBlock(blockArray, size, i.blockIndex, i.recordIndex);
 	Record tmpRecj = getRecordFromBlock(blockArray, size, j.blockIndex, j.recordIndex);
 
